@@ -25,15 +25,35 @@
             <!-- PASSWORD -->
             <div class="form-group">
                 <label>Mot de passe</label>
-                <input type="password" id="mot_de_passe" name="mot_de_passe" class="input">
+                <div class="password-wrapper">
+                    <input type="password" id="mot_de_passe" name="mot_de_passe" class="input">
+                    <button type="button" class="toggle-password" id="togglePassword">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
                 <small class="error-msg" id="err-mot_de_passe"></small>
             </div>
 
             <button type="submit" class="btn btn-primary w-full">
-                Se connecter
+                Se connecter <i class="fas fa-arrow-right"></i>
             </button>
 
         </form>
+
+        <div class="auth-divider">
+            <span>OU</span>
+        </div>
+
+        <div class="social-buttons">
+            <button type="button" class="btn-social btn-google" id="googleBtn">
+                <i class="fab fa-google"></i>
+                Google
+            </button>
+            <button type="button" class="btn-social btn-facebook" id="facebookBtn">
+                <i class="fab fa-facebook-f"></i>
+                Facebook
+            </button>
+        </div>
 
         <p class="auth-footer">
             Pas encore de compte ?

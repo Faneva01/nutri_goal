@@ -60,14 +60,24 @@
                 <!-- PASSWORD -->
                 <div class="form-group">
                     <label>Mot de passe</label>
-                    <input type="password" id="mot_de_passe" name="mot_de_passe" class="input">
+                    <div class="password-wrapper">
+                        <input type="password" id="mot_de_passe" name="mot_de_passe" class="input">
+                        <button type="button" class="toggle-password" id="togglePassword1">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
                     <small class="error-msg" id="err-mot_de_passe"></small>
                 </div>
 
                 <!-- CONFIRM -->
                 <div class="form-group">
                     <label>Confirmation</label>
-                    <input type="password" id="confirm_password" class="input">
+                    <div class="password-wrapper">
+                        <input type="password" id="confirm_password" class="input">
+                        <button type="button" class="toggle-password" id="togglePassword2">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
                     <small class="error-msg" id="err-confirm"></small>
                 </div>
 
@@ -98,7 +108,7 @@
                 <div class="form-actions">
 
                     <button type="button" id="next-btn" class="btn btn-primary w-full">
-                        Continuer
+                        Continuer <i class="fas fa-arrow-right"></i>
                     </button>
                 </div>
             </div>
@@ -121,11 +131,11 @@
                 <div class="form-actions">
 
                     <button type="button" id="prev-btn" class="btn btn-secondary">
-                        Retour
+                        <i class="fas fa-arrow-left"></i> Retour
                     </button>
 
                     <button type="submit" class="btn btn-primary">
-                        S'inscrire
+                        S'inscrire <i class="fas fa-arrow-right"></i>
                     </button>
 
                 </div>

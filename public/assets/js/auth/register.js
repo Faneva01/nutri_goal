@@ -9,6 +9,41 @@ document.addEventListener("DOMContentLoaded", () => {
     const progressSteps = document.querySelectorAll(".progress-step");
     const form = document.getElementById("registerForm");
 
+    const pass = document.getElementById("mot_de_passe");
+    const confirm = document.getElementById("confirm_password");
+    const toggle1 = document.getElementById("togglePassword1");
+    const toggle2 = document.getElementById("togglePassword2");
+
+    // INPUTS
+    const nom = document.getElementById("nom_complet");
+    const email = document.getElementById("email");
+    const taille = document.getElementById("taille");
+    const poids = document.getElementById("poids");
+
+    // TOGGLE PASSWORD 1
+    if (toggle1) {
+        toggle1.addEventListener("click", (e) => {
+            e.preventDefault();
+            const isPassword = pass.type === "password";
+            pass.type = isPassword ? "text" : "password";
+            toggle1.innerHTML = isPassword 
+                ? '<i class="fas fa-eye-slash"></i>' 
+                : '<i class="fas fa-eye"></i>';
+        });
+    }
+
+    // TOGGLE PASSWORD 2
+    if (toggle2) {
+        toggle2.addEventListener("click", (e) => {
+            e.preventDefault();
+            const isPassword = confirm.type === "password";
+            confirm.type = isPassword ? "text" : "password";
+            toggle2.innerHTML = isPassword 
+                ? '<i class="fas fa-eye-slash"></i>' 
+                : '<i class="fas fa-eye"></i>';
+        });
+    }
+
     // STATE
     let errors = {
         nom_complet: true,
@@ -32,15 +67,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return canStep1() && !errors.taille && !errors.poids;
     }
 
-    // RESET initial 
-    function setValid(field) {
-        errors[field] = false;
-    }
-
-    function setInvalid(field) {
-        errors[field] = true;
-    }
-
     // UI
     function showError(id, msg) {
         const el = document.getElementById("err-" + id);
@@ -60,109 +86,169 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("err-step1").textContent = "";
     }
 
-    // AJAX
-    function validate(input, value, cb) {
-        fetch('/auth/validation-input', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'Accept': 'application/json'
-            },
-            body: `input=${input}&value=${encodeURIComponent(value)}`
-        })
-        .then(async r => {
-
-            const text = await r.text();
-
-            try {
-                return JSON.parse(text);
-            } catch (e) {
-                console.error("REPONSE BRUTE SERVER:", text);
-                throw new Error(text); 
-            }
-        })
-        .then(cb)
-        .catch(err => {
-            cb({
-                valid: false,
-                errors: [err.message || "Erreur serveur"]
+    // AJAX VALIDATION
+    function validate(input, value) {
+        return new Promise((resolve) => {
+            fetch('/auth/validation-input', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Accept': 'application/json'
+                },
+                body: `input=${input}&value=${encodeURIComponent(value)}`
+            })
+            .then(async r => {
+                const text = await r.text();
+                try {
+                    return JSON.parse(text);
+                } catch (e) {
+                    console.error("REPONSE BRUTE SERVER:", text);
+                    throw new Error(text); 
+                }
+            })
+            .then(data => {
+                errors[input] = !data.valid;
+                if (data.valid) {
+                    clearError(input);
+                } else {
+                    showError(input, data.errors[0]);
+                }
+                resolve();
+            })
+            .catch(err => {
+                errors[input] = true;
+                showError(input, err.message || "Erreur serveur");
+                resolve();
             });
         });
     }
 
-    // INPUTS
-    const nom = document.getElementById("nom_complet");
-    const email = document.getElementById("email");
-    const pass = document.getElementById("mot_de_passe");
-    const confirm = document.getElementById("confirm_password");
-    const taille = document.getElementById("taille");
-    const poids = document.getElementById("poids");
+    // VALIDATE FIELD SYNCHRONE (LOCAL ONLY)
+    function validateFieldLocal(fieldName, value) {
+        if (fieldName === "mot_de_passe") {
+            if (value.length < 6) {
+                showError("mot_de_passe", "Mot de passe trop faible");
+                errors.mot_de_passe = true;
+                return false;
+            }
+            clearError("mot_de_passe");
+            errors.mot_de_passe = false;
+            return true;
+        }
 
-    // NOM
+        if (fieldName === "confirm") {
+            if (value !== pass.value) {
+                showError("confirm", "Les mots de passe ne correspondent pas");
+                errors.confirm = true;
+                return false;
+            }
+            clearError("confirm");
+            errors.confirm = false;
+            return true;
+        }
+
+        if (fieldName === "genre") {
+            const genre = document.querySelector('input[name="genre"]:checked');
+            if (!genre) {
+                showError("genre", "Genre invalide");
+                errors.genre = true;
+                return false;
+            }
+            clearError("genre");
+            errors.genre = false;
+            return true;
+        }
+
+        if (fieldName === "taille") {
+            if (!value || !Number.isInteger(Number(value)) || value < 50 || value > 250) {
+                showError("taille", "Taille invalide");
+                errors.taille = true;
+                return false;
+            }
+            clearError("taille");
+            errors.taille = false;
+            return true;
+        }
+
+        if (fieldName === "poids") {
+            if (!value || !Number.isInteger(Number(value)) || value < 20 || value > 300) {
+                showError("poids", "Poids invalide");
+                errors.poids = true;
+                return false;
+            }
+            clearError("poids");
+            errors.poids = false;
+            return true;
+        }
+
+        return false;
+    }
+
+    // VALIDATE STEP 1 (ALL FIELDS)
+    async function validateStep1Complete() {
+        clearGlobal();
+        
+        validateFieldLocal("genre", "");
+        validateFieldLocal("mot_de_passe", pass.value);
+        validateFieldLocal("confirm", confirm.value);
+        validateFieldLocal("taille", taille.value);
+        validateFieldLocal("poids", poids.value);
+
+        // ASYNC VALIDATIONS (NOM, EMAIL)
+        const validations = [
+            validate("nom_complet", nom.value),
+            validate("email", email.value)
+        ];
+
+        await Promise.all(validations);
+    }
+
+    // VALIDATE STEP 2
+    async function validateStep2Complete() {
+        validateFieldLocal("taille", taille.value);
+        validateFieldLocal("poids", poids.value);
+    }
+
+    // NOM - BLUR
     nom.addEventListener("blur", () => {
-        validate("nom_complet", nom.value, res => {
-            errors.nom_complet = !res.valid;
-            res.valid ? clearError("nom_complet") : showError("nom_complet", res.errors[0]);
-        });
+        validate("nom_complet", nom.value);
     });
 
-    // EMAIL
+    // EMAIL - BLUR
     email.addEventListener("blur", () => {
-        validate("email", email.value, res => {
-            errors.email = !res.valid;
-            res.valid ? clearError("email") : showError("email", res.errors[0]);
-        });
+        validate("email", email.value);
     });
 
-    // PASSWORD
+    // PASSWORD - BLUR
     pass.addEventListener("blur", () => {
-        validate("mot_de_passe", pass.value, res => {
-            errors.mot_de_passe = !res.valid;
-            res.valid ? clearError("mot_de_passe") : showError("mot_de_passe", res.errors[0]);
-        });
+        validateFieldLocal("mot_de_passe", pass.value);
     });
 
-    // CONFIRM
+    // CONFIRM - BLUR
     confirm.addEventListener("blur", () => {
-        errors.confirm = confirm.value !== pass.value;
-        errors.confirm
-            ? showError("confirm", "Les mots de passe ne correspondent pas")
-            : clearError("confirm");
+        validateFieldLocal("confirm", confirm.value);
     });
 
-    // GENRE 
+    // GENRE - CHANGE
     document.querySelectorAll('input[name="genre"]').forEach(radio => {
         radio.addEventListener("change", () => {
-            const value = document.querySelector('input[name="genre"]:checked')?.value;
-
-            validate("genre", value, res => {
-                errors.genre = !res.valid;
-                res.valid ? clearError("genre") : showError("genre", res.errors[0]);
-            });
+            validate("genre", document.querySelector('input[name="genre"]:checked')?.value);
         });
     });
 
-    // TAILLE
+    // TAILLE - BLUR
     taille.addEventListener("blur", () => {
-        validate("taille", taille.value, res => {
-            errors.taille = !res.valid;
-            res.valid ? clearError("taille") : showError("taille", res.errors[0]);
-        });
+        validateFieldLocal("taille", taille.value);
     });
 
-    // POIDS
+    // POIDS - BLUR
     poids.addEventListener("blur", () => {
-        validate("poids", poids.value, res => {
-            errors.poids = !res.valid;
-            res.valid ? clearError("poids") : showError("poids", res.errors[0]);
-        });
+        validateFieldLocal("poids", poids.value);
     });
 
-    // NEXT
-    nextBtn.addEventListener("click", () => {
-
-        const genre = document.querySelector('input[name="genre"]:checked');
-        if (!genre) errors.genre = true;
+    // NEXT BUTTON
+    nextBtn.addEventListener("click", async () => {
+        await validateStep1Complete();
 
         if (!canStep1()) {
             showGlobal("Corrige les erreurs avant de continuer");
@@ -175,15 +261,18 @@ document.addEventListener("DOMContentLoaded", () => {
         progressSteps[1].classList.add("active");
     });
 
+    // PREV BUTTON
     prevBtn.addEventListener("click", () => {
         step2.classList.remove("active");
         step1.classList.add("active");
         progressSteps[1].classList.remove("active");
     });
 
-    // SUBMIT
-    form.addEventListener("submit", e => {
+    // SUBMIT FORM
+    form.addEventListener("submit", async (e) => {
         e.preventDefault();
+
+        await validateStep2Complete();
 
         if (!canSubmit()) {
             showGlobal("Formulaire invalide");
@@ -196,11 +285,9 @@ document.addEventListener("DOMContentLoaded", () => {
         })
         .then(r => r.json())
         .then(data => {
-
             if (data.success) {
                 window.location.href = "/login";
             } else {
-
                 if (data.errors) {
                     Object.keys(data.errors).forEach(k => {
                         showError(k, data.errors[k]);

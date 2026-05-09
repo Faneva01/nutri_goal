@@ -10,6 +10,7 @@ writable/logs/*
 writable/session/*
 writable/debugbar/*
 writable/benchmarks/*
+public/writable
 
 # garder les dossiers mais pas leur contenu
 !writable/cache/index.html

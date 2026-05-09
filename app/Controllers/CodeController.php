@@ -19,9 +19,14 @@ class CodeController extends BaseController
      */
     public function achat()
     {
+<<<<<<< HEAD
         return view('pages/achat_code', [
             'title' => 'Achat de Code Portefeuille',
             'styles' => ['style.css']
+=======
+        return view('portefeuille/achat-code', [
+            'title' => 'Achat de Code Portefeuille',
+>>>>>>> e323c95 (Added payment validation feature)
         ]);
     }
 
@@ -59,9 +64,14 @@ class CodeController extends BaseController
      */
     public function validation()
     {
+<<<<<<< HEAD
         return view('pages/validation_code', [
             'title' => 'Validation du Code Portefeuille',
             'styles' => ['style.css']
+=======
+        return view('portefeuille/validation-code', [
+            'title' => 'Validation du Code Portefeuille',
+>>>>>>> e323c95 (Added payment validation feature)
         ]);
     }
 

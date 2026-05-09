@@ -8,6 +8,13 @@ use CodeIgniter\Router\RouteCollection;
  * @var RouteCollection $routes
  */
 
+<<<<<<< HEAD
+=======
+// Routes de test
+$routes->get('/test-paiement', 'TestPaiementController::index');
+$routes->get('/test-model', 'TestPaiementController::testModel');
+
+>>>>>>> e323c95 (Added payment validation feature)
 // Routes pour les codes portefeuille
 $routes->get('/code/achat', 'CodeController::achat');
 $routes->post('/code/achat', 'CodeController::traiterAchat');

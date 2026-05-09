@@ -1,3 +1,8 @@
+# Configuration pour XAMPP MySQL
+php_value mysql.default_socket /opt/lampp/var/mysql/mysql.sock
+php_value mysqli.default_socket /opt/lampp/var/mysql/mysql.sock
+php_value pdo_mysql.default_socket /opt/lampp/var/mysql/mysql.sock
+
 # Disable directory browsing
 Options -Indexes
 

@@ -12,3 +12,6 @@ $routes->get('/produit/(:num)', 'Produit::show/$1');
 
 // Test composant
 $routes->get('/test', 'TestComposantController::index');
+
+// Charger les routes de paiement et code portefeuille
+require_once APPPATH . 'Config/routes/paiement_routes.php';

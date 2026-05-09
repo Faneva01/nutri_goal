@@ -71,7 +71,12 @@ class CodePortefeuilleModel extends Model
     {
         $this->db->transStart();
 
-        $codeData = $this->forUpdate()->where('code', $code)->first();
+        $builder = $this->builder();
+        if (method_exists($builder, 'forUpdate')) {
+            $builder->forUpdate();
+        }
+
+        $codeData = $builder->where('code', $code)->get()->getRowArray();
 
         if (empty($codeData) || (int) $codeData['est_utilise'] === 1) {
             $this->db->transComplete();

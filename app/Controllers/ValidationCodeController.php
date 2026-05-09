@@ -30,7 +30,7 @@ class ValidationCodeController extends BaseController
     public function integrer()
     {
         $code = $this->request->getPost('code');
-        $utilisateurId = session()->get('user_id');
+        $utilisateurId = $this->getCurrentUserId();
 
         if (!$utilisateurId) {
             return redirect()->to('/login')->with('error', 'Vous devez être connecté pour intégrer un code.');
@@ -49,6 +49,30 @@ class ValidationCodeController extends BaseController
         }
 
         return redirect()->back()->with('error', 'Impossible d’intégrer le code pour le moment.');
+    }
+
+    protected function getCurrentUserId()
+    {
+        $session = session();
+
+        if ($session->has('user_id')) {
+            return $session->get('user_id');
+        }
+
+        if ($session->has('id')) {
+            return $session->get('id');
+        }
+
+        $user = $session->get('user');
+        if (is_array($user) && isset($user['id'])) {
+            return $user['id'];
+        }
+
+        if (is_object($user) && isset($user->id)) {
+            return $user->id;
+        }
+
+        return null;
     }
 
     /**

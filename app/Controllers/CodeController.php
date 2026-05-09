@@ -19,9 +19,10 @@ class CodeController extends BaseController
      */
     public function achat()
     {
-        return view('pages/achat_code', [
+        return view('pages/portefeuille/achat-code', [
             'title' => 'Achat de Code Portefeuille',
-            'styles' => ['style.css']
+            'styles' => ['portefeuille/portefeuille.css'],
+            'scripts' => ['portefeuille/portefeuille.js']
         ]);
     }
 
@@ -59,9 +60,10 @@ class CodeController extends BaseController
      */
     public function validation()
     {
-        return view('pages/validation_code', [
+        return view('pages/portefeuille/validation-code', [
             'title' => 'Validation du Code Portefeuille',
-            'styles' => ['style.css']
+            'styles' => ['portefeuille/portefeuille.css'],
+            'scripts' => ['portefeuille/portefeuille.js']
         ]);
     }
 
@@ -71,7 +73,7 @@ class CodeController extends BaseController
     public function traiterValidation()
     {
         $code = $this->request->getPost('code');
-        $utilisateurId = session()->get('user_id'); // À adapter selon votre système d'authentification
+        $utilisateurId = $this->getCurrentUserId();
 
         if (!$utilisateurId) {
             return redirect()->to('/login')->with('error', 'Vous devez être connecté');
@@ -88,6 +90,30 @@ class CodeController extends BaseController
         }
 
         return redirect()->back()->with('error', 'Erreur lors de la validation du code');
+    }
+
+    protected function getCurrentUserId()
+    {
+        $session = session();
+
+        if ($session->has('user_id')) {
+            return $session->get('user_id');
+        }
+
+        if ($session->has('id')) {
+            return $session->get('id');
+        }
+
+        $user = $session->get('user');
+        if (is_array($user) && isset($user['id'])) {
+            return $user['id'];
+        }
+
+        if (is_object($user) && isset($user->id)) {
+            return $user->id;
+        }
+
+        return null;
     }
 
     /**

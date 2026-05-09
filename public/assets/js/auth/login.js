@@ -4,6 +4,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const email = document.getElementById("email");
     const pass = document.getElementById("mot_de_passe");
+    const toggleBtn = document.getElementById("togglePassword");
+    const googleBtn = document.getElementById("googleBtn");
+    const facebookBtn = document.getElementById("facebookBtn");
+
+    // TOGGLE PASSWORD
+    if (toggleBtn) {
+        toggleBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            const isPassword = pass.type === "password";
+            pass.type = isPassword ? "text" : "password";
+            toggleBtn.innerHTML = isPassword 
+                ? '<i class="fas fa-eye-slash"></i>' 
+                : '<i class="fas fa-eye"></i>';
+        });
+    }
+
+    // SOCIAL BUTTONS
+    if (googleBtn) {
+        googleBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            alert("Fonctionnalité non implémentée");
+        });
+    }
+
+    if (facebookBtn) {
+        facebookBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            alert("Fonctionnalité non implémentée");
+        });
+    }
 
     function showError(id, msg) {
         document.getElementById("err-" + id).textContent = msg || "";

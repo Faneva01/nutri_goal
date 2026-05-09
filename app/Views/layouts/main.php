@@ -20,6 +20,9 @@ $show_navbar = $show_navbar ?? true;
     <?php foreach ($styles as $style): ?>
         <link rel="stylesheet" href="<?= css_url($style) ?>">
     <?php endforeach; ?>
+
+    <!-- CDN Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
 <body>

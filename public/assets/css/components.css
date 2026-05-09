@@ -1,4 +1,3 @@
-
 /* TITRES */
 
 .title {
@@ -73,7 +72,33 @@
 
 .input:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(225,120,100,0.2);
+    box-shadow: none;
+}
+
+/* INPUT NUMBER - ENLEVER SPINNERS */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+/* AUTOFILL DU NAVIGATEUR */
+.input:-webkit-autofill,
+.input:-webkit-autofill:hover {
+    -webkit-box-shadow: 0 0 0 1000px white inset !important;
+    -webkit-text-fill-color: var(--dark) !important;
+    border-color: var(--gray) !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+.input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px white inset !important;
+    -webkit-text-fill-color: var(--dark) !important;
+    border-color: var(--primary) !important;
 }
 
 /* CARTES */

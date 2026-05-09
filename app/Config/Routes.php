@@ -5,6 +5,10 @@ use CodeIgniter\Router\RouteCollection;
 /**
  * @var RouteCollection $routes
  */
-$routes->get('/', 'Home::index');
+
+$routes->get('/', 'HomeController::index');
 $routes->get('/produits','Produit::index');
 $routes->get('/produit/(:num)', 'Produit::show/$1');
+
+// Test composant
+$routes->get('/test', 'TestComposantController::index');

@@ -1,0 +1,34 @@
+guide_git.txt
+
+# SYSTEM CACHE / LOGS / SESSIONS
+writable/cache/*
+writable/logs/*
+writable/session/*
+writable/debugbar/*
+writable/benchmarks/*
+
+# garder les dossiers mais pas leur contenu
+!writable/cache/index.html
+!writable/logs/index.html
+!writable/session/index.html
+
+# UPLOADS (important pour ton projet S4)
+public/uploads/*
+!public/uploads/index.html
+
+# COMPOSER
+vendor/
+
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# IGNORE CACHE PHP
+*.log
+*.cache

@@ -1,0 +1,51 @@
+/* VARIABLES GLOBALES */
+
+:root {
+
+    /* Couleurs principales */
+    --primary: #E17864;
+    --primary-light: #F89F90;
+    --primary-soft: #FAB693;
+
+    /* Couleurs secondaires */
+    --secondary: #6A7C4F;
+    --secondary-light: #DBEB94;
+
+    /* Accent */
+    --accent: #FAB863;
+
+    /* Couleurs neutres */
+    --white: #FFFFFF;
+    --light: #F8F8F8;
+    --gray: #D9D9D9;
+    --dark: #333333;
+    --text: #444444;
+
+    /* Etats */
+    --success: #4CAF50;
+    --danger: #E53935;
+    --warning: #FB8C00;
+
+    /* Ombres */
+    --shadow-sm: 0 2px 5px rgba(0,0,0,0.08);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.12);
+
+    /* Arrondis */
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 18px;
+    --radius-xl: 24px;
+
+    /* Espacements */
+    --space-xs: 5px;
+    --space-sm: 10px;
+    --space-md: 20px;
+    --space-lg: 30px;
+    --space-xl: 50px;
+
+    /* Transition */
+    --transition: 0.25s ease;
+
+    /* Taille max */
+    --container: 1200px;
+}

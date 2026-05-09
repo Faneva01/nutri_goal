@@ -14,3 +14,4 @@ $routes->get('/produit/(:num)', 'Produit::show/$1');
 $routes->get('/test', 'TestComposantController::index');
 
 require APPPATH . 'Config/Routes/auth_route.php';
+require APPPATH . 'Config/Routes/paiement_routes.php';

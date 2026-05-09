@@ -1,0 +1,75 @@
+PROJET S4
+
+Concept général
+- Groupe de 3 (mixte fille/garçon)
+- À rendre ce lundi 11 mai 2026
+
+Livraison :
+- Formulaire de livraison Google Forms
+- Lien du code source GitLab ou GitHub
+- Script SQL de la base de données
+- Liste des membres du groupe
+- Liste Google Sheet pour le suivi des tâches
+- Les commits et push doivent être effectués tout au long du projet et non pas seulement à la fin
+- La branche main sera la branche de référence, il faut effectuer un merge dedans
+
+Thème
+Mise en place d’une application pour sélectionner un régime alimentaire adapté selon ses objectifs.
+
+L’utilisateur entre ses informations :
+- Genre
+- Taille
+- Poids
+
+Le système affiche son indice de masse corporelle (IMC).
+
+Front Office
+
+Fonctionnalités minimum :
+- Inscription et login
+- Lors de l’inscription, il faut séparer en 2 pages différentes :
+  - Informations utilisateur (nom, email, genre, …)
+  - Informations de santé (taille, poids)
+- Complétion du profil utilisateur
+- L’utilisateur peut choisir 3 objectifs :
+  - Augmenter son poids
+  - Réduire son poids
+  - Atteindre son IMC idéal
+- L’application suggère les régimes et l’activité sportive nécessaire pendant une durée
+- Exportation PDF
+- L’utilisateur peut rajouter de l’argent dans son porte-monnaie en rentrant un code
+- L’utilisateur peut avoir une option Gold qu’il va payer en une seule fois
+- À vous de proposer le prix et le mode d’accès
+- Avec l’option Gold, l’utilisateur aura 15% de remise sur tous les régimes
+
+Back Office
+
+- Page d’authentification au démarrage
+- Tableau de bord avec statistiques :
+  - Graphes
+  - Tableaux croisés
+  - etc.
+
+Fonctionnalités :
+- CRUD des régimes
+- Prix variant selon la durée
+- Chaque régime permet de varier le poids pendant une durée (en plus ou en moins)
+- Pour constituer un régime, on doit mettre :
+  - % de viande
+  - % de poisson
+  - % de volaille
+- CRUD des activités sportives
+- Validation des codes pour le porte-monnaie des utilisateurs
+- CRUD des paramètres nécessaires
+
+Technologies
+- PHP + Framework CodeIgniter
+- HTML / CSS
+- JavaScript / AJAX
+- MySQL ou PostgreSQL
+
+Données minimales
+- 5 utilisateurs
+- 15 codes
+- 5 régimes
+- 5 activités sportives

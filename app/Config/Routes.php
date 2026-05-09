@@ -12,3 +12,5 @@ $routes->get('/produit/(:num)', 'Produit::show/$1');
 
 // Test composant
 $routes->get('/test', 'TestComposantController::index');
+
+require APPPATH . 'Config/Routes/auth_route.php';

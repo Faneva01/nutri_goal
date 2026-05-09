@@ -2,6 +2,7 @@
 $title = $title ?? 'Nutri Goal';
 $styles = $styles ?? [];
 $scripts = $scripts ?? [];
+$show_navbar = $show_navbar ?? true;
 ?>
 
 <!DOCTYPE html>
@@ -23,13 +24,15 @@ $scripts = $scripts ?? [];
 
 <body>
 
-    <!-- NAV (composant global) -->
-    <?= view('inc/nav') ?>
+    <!-- NAVBAR -->
+    <?php if ($show_navbar): ?>
+        <?= view('inc/nav') ?>
+    <?php endif; ?>
 
-    <!-- CONTENU PAGE -->
+    <!-- CONTENU -->
     <?= $this->renderSection('content') ?>
 
-    <!-- JS spécifiques page -->
+    <!-- JS spécifiques -->
     <?php foreach ($scripts as $script): ?>
         <script src="<?= js_url($script) ?>"></script>
     <?php endforeach; ?>

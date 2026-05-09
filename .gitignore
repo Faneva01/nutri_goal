@@ -1,5 +1,9 @@
 guide_git.txt
 
+# ENVIRONMENT (chaque développeur a sa propre config)
+.env
+.env.local
+
 # SYSTEM CACHE / LOGS / SESSIONS
 writable/cache/*
 writable/logs/*

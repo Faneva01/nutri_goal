@@ -36,7 +36,7 @@ class ProfilController extends BaseController
             ];
         }
 
-        return view('pages/profil-page', [
+        return view('pages/profil/profil_page', [
             'title' => 'Mon profil',
             'user'  => $user,
             'navView' => 'inc/nav_profil',

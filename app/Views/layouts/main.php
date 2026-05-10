@@ -2,7 +2,7 @@
 $title = $title ?? 'Nutri Goal';
 $styles = $styles ?? [];
 $scripts = $scripts ?? [];
-$show_navbar = $show_navbar ?? true;
+$navView = $navView ?? 'inc/nav';
 ?>
 
 <!DOCTYPE html>
@@ -20,22 +20,17 @@ $show_navbar = $show_navbar ?? true;
     <?php foreach ($styles as $style): ?>
         <link rel="stylesheet" href="<?= css_url($style) ?>">
     <?php endforeach; ?>
-
-    <!-- CDN Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
 <body>
 
-    <!-- NAVBAR -->
-    <?php if ($show_navbar): ?>
-        <?= view('inc/nav') ?>
-    <?php endif; ?>
+    <!-- NAV (composant global) -->
+    <?= view($navView, ['user' => $user ?? null]) ?>
 
-    <!-- CONTENU -->
+    <!-- CONTENU PAGE -->
     <?= $this->renderSection('content') ?>
 
-    <!-- JS spécifiques -->
+    <!-- JS spécifiques page -->
     <?php foreach ($scripts as $script): ?>
         <script src="<?= js_url($script) ?>"></script>
     <?php endforeach; ?>

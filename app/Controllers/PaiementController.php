@@ -30,6 +30,24 @@ class PaiementController extends BaseController
      */
     public function choisir($codeId = null)
     {
+        // Si la requête est GET, afficher le formulaire de sélection de moyen de paiement
+        if ($this->request->getMethod() === 'get') {
+            $codeData = null;
+
+            if ($codeId) {
+                $codeData = $this->codePortefeuilleModel->find($codeId);
+                if (!$codeData) {
+                    return redirect()->to('/code/achat')->with('error', 'Code introuvable');
+                }
+            }
+
+            return view('pages/choix_paiement', [
+                'title' => 'Choisir un Moyen de Paiement',
+                'code_data' => $codeData,
+                'styles' => ['style.css'],
+            ]);
+        }
+
         $moyenPaiement = $this->request->getPost('moyen_paiement');
 
         if (!$moyenPaiement) {
@@ -42,8 +60,8 @@ class PaiementController extends BaseController
             return redirect()->back()->with('error', 'Moyen de paiement invalide');
         }
 
-        // Si un codeId est fourni, vérifier qu'il existe
         $codeData = null;
+        $codeId = $this->request->getPost('code_id') ?? $codeId;
         if ($codeId) {
             $codeData = $this->codePortefeuilleModel->find($codeId);
             if (!$codeData) {

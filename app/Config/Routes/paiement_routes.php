@@ -18,6 +18,7 @@ $routes->get('/code/historique', 'CodeController::historique');
 
 // Routes pour les paiements
 $routes->get('/paiement', 'PaiementController::index');
+$routes->get('/paiement/process/(:segment)', 'PaiementController::choisir/$1');
 $routes->post('/paiement/choisir', 'PaiementController::choisir');
 $routes->post('/paiement/traiter/(:segment)', 'PaiementController::traiter/$1');
 $routes->get('/paiement/success', 'PaiementController::success');

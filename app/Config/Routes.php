@@ -7,3 +7,4 @@ use CodeIgniter\Router\RouteCollection;
  */
 
 require APPPATH . 'Config/Routes/auth_route.php';
+require APPPATH . 'Config/Routes/regime_route.php';

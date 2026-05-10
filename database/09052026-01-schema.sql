@@ -92,15 +92,21 @@ CREATE TABLE suggestions_activites (
 
 -- Table codes solde
 CREATE TABLE codes_solde (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  code VARCHAR(20) UNIQUE NOT NULL,
-  montant DECIMAL(10, 2) NOT NULL,
-  utilisateur_id INT COMMENT 'NULL si non utilisé',
-  date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  date_utilisation TIMESTAMP NULL,
-  FOREIGN KEY (utilisateur_id) REFERENCES utilisateurs(id) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    code VARCHAR(30) UNIQUE NOT NULL,
+    montant DECIMAL(10,2) NOT NULL,
+    utilisateur_id INT NULL COMMENT 'Utilisateur ayant utilisé le code',
+    est_utilise TINYINT DEFAULT 0,
+    date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    date_utilisation TIMESTAMP NULL,
+    date_expiration TIMESTAMP NULL,
+    FOREIGN KEY (utilisateur_id)
+        REFERENCES utilisateurs(id)
+        ON DELETE SET NULL
 
+) ENGINE=InnoDB
+DEFAULT CHARSET=utf8mb4
+COLLATE=utf8mb4_unicode_ci;
 -- Table historique transactions solde
 CREATE TABLE historique_transactions (
   id INT PRIMARY KEY AUTO_INCREMENT,

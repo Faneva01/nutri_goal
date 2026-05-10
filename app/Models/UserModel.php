@@ -4,14 +4,14 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-class UserModel extends Model
-{
+class UserModel extends Model {
     protected $table            = 'utilisateurs';
     protected $primaryKey       = 'id';
     protected $returnType       = 'array';
     protected $useAutoIncrement = true;
     protected $protectFields    = true;
 
+    // CHAMPS AUTORISÉS
     protected $allowedFields = [
         'nom_complet',
         'email',
@@ -20,11 +20,10 @@ class UserModel extends Model
         'taille',
         'poids',
         'imc',
-        'option_gold',
         'solde'
     ];
 
-    // TIMESTAMPS (si tes colonnes existent)
+    // TIMESTAMPS
     protected $useTimestamps = false;
 
     // VALIDATION
@@ -43,39 +42,54 @@ class UserModel extends Model
         ]
     ];
 
-    // HASH PASSWORD
-    protected function hashPassword(array $data)
-    {
-        if (!isset($data['data']['mot_de_passe'])) return $data;
+    // CALLBACKS
+    protected $beforeInsert = ['hashPassword', 'calculateIMC'];
+    protected $beforeUpdate = ['hashPassword', 'calculateIMC'];
 
-        $data['data']['mot_de_passe'] = password_hash(
-            $data['data']['mot_de_passe'],
-            PASSWORD_BCRYPT
-        );
+    /**
+     * HASH PASSWORD
+     */
+    protected function hashPassword(array $data) {
+        if (!isset($data['data']['mot_de_passe'])) {
+            return $data;
+        }
+
+        $password = $data['data']['mot_de_passe'];
+
+        // éviter double hash
+        if (password_get_info($password)['algo'] !== 0) {
+            return $data;
+        }
+
+        $data['data']['mot_de_passe'] = password_hash($password, PASSWORD_BCRYPT);
 
         return $data;
     }
 
-    // CALCUL IMC
-    protected function calculateBMI(array $data)
-    {
+    /**
+     * CALCUL IMC
+     */
+    protected function calculateIMC(array $data) {
         if (isset($data['data']['taille'], $data['data']['poids'])) {
 
-            $t = $data['data']['taille'];
-            $p = $data['data']['poids'];
+            $taille = $data['data']['taille'];
+            $poids  = $data['data']['poids'];
 
-            $data['data']['imc'] = round($p / (($t / 100) ** 2), 2);
+            if ($taille > 0) {
+                $data['data']['imc'] = round($poids / (($taille / 100) ** 2), 2);
+            }
         }
 
         return $data;
     }
 
-    protected $beforeInsert = ['hashPassword', 'calculateBMI'];
-
+    // AUTH LOGIN
     public function authenticate(string $email, string $password) {
         $user = $this->where('email', $email)->first();
 
-        if (!$user) return null;
+        if (!$user) {
+            return null;
+        }
 
         if (!password_verify($password, $user['mot_de_passe'])) {
             return null;
@@ -84,6 +98,7 @@ class UserModel extends Model
         return $user;
     }
 
+    // GET USER
     public function getUserByEmail(string $email) {
         return $this->where('email', $email)->first();
     }

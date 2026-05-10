@@ -2,6 +2,7 @@
 $title = $title ?? 'Nutri Goal';
 $styles = $styles ?? [];
 $scripts = $scripts ?? [];
+$navView = $navView ?? 'inc/nav';
 ?>
 
 <!DOCTYPE html>
@@ -24,7 +25,7 @@ $scripts = $scripts ?? [];
 <body>
 
     <!-- NAV (composant global) -->
-    <?= view('inc/nav') ?>
+    <?= view($navView, ['user' => $user ?? null]) ?>
 
     <!-- CONTENU PAGE -->
     <?= $this->renderSection('content') ?>

@@ -18,7 +18,7 @@ class DashboardUserController extends BaseController
         $userId = session()->get('user_id');
         $dashboard = $this->dashboardModel->getDashboardData($userId ? (int) $userId : null);
 
-        return view('pages/dashboard-user', [
+        return view('pages/dashboardUser/dashboard_user', [
             'title' => 'Dashboard utilisateur',
             'navView' => 'inc/nav_profil',
             'user' => $dashboard['user'],

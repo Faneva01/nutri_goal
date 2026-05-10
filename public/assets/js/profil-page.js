@@ -1,49 +1,37 @@
 /* ============================================================
-   NutriGoal – script.js
+   profil-page.js  — NutriGoal
    ============================================================ */
 
-// ── Profile Photo Upload ─────────────────────────────────────
+// ── Photo Upload ─────────────────────────────────────────────
 function handlePhotoUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
-
   if (!file.type.startsWith('image/')) {
-    showToast('⚠️ Veuillez sélectionner une image valide.');
+    showToast('warning', 'Veuillez sélectionner une image valide.');
     return;
   }
-
   const reader = new FileReader();
-  reader.onload = function(e) {
-    const dataUrl = e.target.result;
-
-    // Update banner avatar
-    const avatarCircle = document.querySelector('.avatar-circle');
-    avatarCircle.innerHTML = `<img src="${dataUrl}" alt="Photo de profil" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`;
-
-    // Update navbar avatar
-    const navAvatar = document.getElementById('nav-avatar');
-    navAvatar.innerHTML = `<img src="${dataUrl}" alt="Photo de profil" />`;
-
-    showToast('✅ Photo de profil mise à jour !');
+  reader.onload = (e) => {
+    const src = e.target.result;
+    document.querySelector('.avatar-circle').innerHTML =
+      `<img src="${src}" alt="Photo" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`;
+    showToast('success', 'Photo mise à jour localement.');
   };
   reader.readAsDataURL(file);
-
-  // Reset input so same file can be re-selected
   event.target.value = '';
 }
 
-
+// ── IMC ──────────────────────────────────────────────────────
 function updateIMC() {
   const taille = parseFloat(document.getElementById('taille').value) / 100;
   const poids  = parseFloat(document.getElementById('poids').value);
-
   if (!taille || !poids || taille <= 0) return;
 
-  const imc = poids / (taille * taille);
+  const imc     = poids / (taille * taille);
   const rounded = imc.toFixed(2);
 
-  document.getElementById('imc-display').value = rounded;
-  document.getElementById('imc-value').textContent  = rounded;
+  document.getElementById('imc-display').value    = rounded;
+  document.getElementById('imc-value').textContent = rounded;
 
   const badge = document.getElementById('imc-badge');
   badge.className = 'imc-badge';
@@ -62,20 +50,18 @@ function updateIMC() {
   }
 }
 
-// ── Spinner Helpers ──────────────────────────────────────────
+// ── Spinners ─────────────────────────────────────────────────
 function increment(id, step = 1) {
-  const el = document.getElementById(id);
+  const el  = document.getElementById(id);
   const max = parseFloat(el.max) || Infinity;
-  const val = parseFloat(el.value) + step;
-  el.value = Math.min(val, max).toFixed(step < 1 ? 1 : 0);
+  el.value  = Math.min(parseFloat(el.value) + step, max).toFixed(step < 1 ? 1 : 0);
   updateIMC();
 }
 
 function decrement(id, step = 1) {
-  const el = document.getElementById(id);
+  const el  = document.getElementById(id);
   const min = parseFloat(el.min) || 0;
-  const val = parseFloat(el.value) - step;
-  el.value = Math.max(val, min).toFixed(step < 1 ? 1 : 0);
+  el.value  = Math.max(parseFloat(el.value) - step, min).toFixed(step < 1 ? 1 : 0);
   updateIMC();
 }
 
@@ -84,8 +70,7 @@ function togglePassword() {
   const pwd  = document.getElementById('password');
   const icon = document.getElementById('eye-icon');
   const show = pwd.type === 'password';
-  pwd.type = show ? 'text' : 'password';
-
+  pwd.type   = show ? 'text' : 'password';
   icon.innerHTML = show
     ? `<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/>
        <path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/>
@@ -94,47 +79,78 @@ function togglePassword() {
        <circle cx="12" cy="12" r="3"/>`;
 }
 
-// ── Save Changes ─────────────────────────────────────────────
-function saveChanges() {
+// ── Save Changes (appel AJAX → ProfilController::update) ─────
+async function saveChanges() {
   const name  = document.getElementById('fullname').value.trim();
   const email = document.getElementById('email').value.trim();
 
   if (!name || !email) {
-    showToast('⚠️ Veuillez remplir tous les champs obligatoires.');
+    showToast('warning', 'Nom et email sont obligatoires.');
     return;
   }
 
-  // Update navbar username
-  document.getElementById('navbar-username').textContent = name.split(' ')[0];
+  const body = new URLSearchParams({
+    fullname: name,
+    email,
+    genre:    document.getElementById('genre').value,
+    taille:   document.getElementById('taille').value,
+    poids:    document.getElementById('poids').value,
+    password: document.getElementById('password').value,
+  });
 
-  // Update banner
-  document.getElementById('banner-name').textContent  = name;
-  document.getElementById('banner-email').textContent = email;
+  const btn = document.querySelector('.save-btn');
+  btn.disabled  = true;
+  btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Enregistrement…`;
 
-  // Update avatar initial (only if no photo uploaded)
-  const avatarEl = document.querySelector('.avatar-circle');
-  if (!avatarEl.querySelector('img')) {
-    avatarEl.textContent = name.charAt(0).toUpperCase();
+  try {
+    const res  = await fetch('/profil/update', { method: 'POST', body });
+    const data = await res.json();
+
+    if (data.success) {
+      document.getElementById('banner-name').textContent  = name;
+      document.getElementById('banner-email').textContent = email;
+      const avatarEl = document.querySelector('.avatar-circle');
+      if (!avatarEl.querySelector('img')) {
+        avatarEl.textContent = name.charAt(0).toUpperCase();
+      }
+      if (data.imc) {
+        document.getElementById('imc-display').value     = data.imc;
+        document.getElementById('imc-value').textContent = data.imc;
+      }
+      document.getElementById('password').value = '';
+      showToast('success', data.message);
+    } else {
+      showToast('error', data.message || 'Erreur inconnue.');
+    }
+  } catch {
+    showToast('error', 'Erreur réseau. Veuillez réessayer.');
+  } finally {
+    btn.disabled  = false;
+    btn.innerHTML = `<i class="fas fa-save"></i> Enregistrer les modifications`;
   }
-
-  showToast('✅ Modifications enregistrées avec succès !');
 }
 
-// ── Gold Toggle ──────────────────────────────────────────────
-function toggleGold() {
+// ── Gold Toggle (appel AJAX → ProfilController::toggleGold) ──
+async function toggleGold() {
   const active = document.getElementById('gold-toggle').checked;
   document.getElementById('gold-status-text').textContent = active ? 'Activé' : 'Non activé';
-  showToast(active ? '👑 Option Gold activée !' : '🔕 Option Gold désactivée.');
+
+  try {
+    const body = new URLSearchParams({ option_gold: active ? 1 : 0 });
+    const res  = await fetch('/profil/toggleGold', { method: 'POST', body });
+    const data = await res.json();
+    if (!data.success) showToast('error', 'Erreur lors de la mise à jour Gold.');
+    else showToast(active ? 'gold' : 'info', active ? 'Option Gold activée !' : 'Option Gold désactivée.');
+  } catch {
+    showToast('error', 'Erreur réseau.');
+  }
 }
 
-// ── Wallet Code Validation ────────────────────────────────────
-const PROMO_CODES = { 'NUTRIFIT10': 10, 'GOLD25': 25, 'BONUS5': 5 };
-const usedCodes   = new Set();
-
-function validateCode() {
+// ── Wallet Code (appel AJAX → ProfilController::rechargerSolde) ──
+async function validateCode() {
   const input    = document.getElementById('promo-code');
   const feedback = document.getElementById('code-feedback');
-  const code     = input.value.trim().toUpperCase();
+  const code     = input.value.trim();
 
   if (!code) {
     feedback.textContent = 'Veuillez entrer un code.';
@@ -142,43 +158,50 @@ function validateCode() {
     return;
   }
 
-  if (usedCodes.has(code)) {
-    feedback.textContent = 'Ce code a déjà été utilisé.';
-    feedback.className   = 'code-feedback error';
-    return;
-  }
+  try {
+    const body = new URLSearchParams({ code });
+    const res  = await fetch('/profil/rechargerSolde', { method: 'POST', body });
+    const data = await res.json();
 
-  if (PROMO_CODES[code] !== undefined) {
-    const amount = PROMO_CODES[code];
-    usedCodes.add(code);
+    if (data.success) {
+      const balanceEl     = document.getElementById('balance');
+      balanceEl.textContent = data.nouveau_solde + ' €';
+      balanceEl.style.transform = 'scale(1.15)';
+      setTimeout(() => balanceEl.style.transform = 'scale(1)', 300);
 
-    const balanceEl   = document.getElementById('balance');
-    const current     = parseFloat(balanceEl.textContent.replace(' €', '').replace(',', '.'));
-    const newBalance  = (current + amount).toFixed(2);
-    balanceEl.textContent = newBalance + ' €';
-
-    feedback.textContent = `+${amount} € crédités sur votre solde !`;
-    feedback.className   = 'code-feedback success';
-    input.value          = '';
-
-    // Animate balance
-    balanceEl.style.transform = 'scale(1.15)';
-    setTimeout(() => balanceEl.style.transform = 'scale(1)', 300);
-
-    showToast(`💰 Code valide ! +${amount} € ajoutés.`);
-  } else {
-    feedback.textContent = 'Code invalide ou expiré.';
+      feedback.textContent = data.message;
+      feedback.className   = 'code-feedback success';
+      input.value          = '';
+      showToast('success', data.message);
+    } else {
+      feedback.textContent = data.message || 'Code invalide.';
+      feedback.className   = 'code-feedback error';
+    }
+  } catch {
+    feedback.textContent = 'Erreur réseau.';
     feedback.className   = 'code-feedback error';
   }
 
-  setTimeout(() => { feedback.textContent = ''; feedback.className = 'code-feedback'; }, 4000);
+  setTimeout(() => {
+    feedback.textContent = '';
+    feedback.className   = 'code-feedback';
+  }, 4000);
 }
 
-// ── Toast Helper ─────────────────────────────────────────────
-function showToast(message) {
+// ── Toast ─────────────────────────────────────────────────────
+const TOAST_ICONS = {
+  success: '<i class="fas fa-check-circle"></i>',
+  error:   '<i class="fas fa-times-circle"></i>',
+  warning: '<i class="fas fa-exclamation-triangle"></i>',
+  info:    '<i class="fas fa-info-circle"></i>',
+  gold:    '<i class="fas fa-crown"></i>',
+};
+
+function showToast(type, message) {
   const toast = document.getElementById('toast');
-  toast.textContent = message;
-  toast.classList.add('show');
+  const icon  = TOAST_ICONS[type] || TOAST_ICONS.info;
+  toast.innerHTML = `${icon} <span>${message}</span>`;
+  toast.className = `toast toast--${type} show`;
   clearTimeout(toast._timer);
   toast._timer = setTimeout(() => toast.classList.remove('show'), 3000);
 }
@@ -186,8 +209,6 @@ function showToast(message) {
 // ── Init ─────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   updateIMC();
-
-  // Allow Enter key on promo code input
   document.getElementById('promo-code').addEventListener('keydown', e => {
     if (e.key === 'Enter') validateCode();
   });

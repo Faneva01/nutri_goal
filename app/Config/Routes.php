@@ -1,18 +1,17 @@
 <?php
 
+use App\Controllers\DashboardUserController;    
 use CodeIgniter\Router\RouteCollection;
 
 /**
  * @var RouteCollection $routes
  */
 
+
+$routes->get("/", [DashboardUserController::class, 'index']);
+
 require APPPATH . 'Config/Routes/auth_route.php';
+require APPPATH . 'Config/Routes/dashboard_user_routes.php';
 require APPPATH . 'Config/Routes/regime_route.php';
 require APPPATH . 'Config/Routes/paiement_routes.php';
-
-// Routes profil (fichier séparé)
-require __DIR__ . '/Routes/profil_route.php';
-
-// Routes dashboard utilisateur (fichier séparé)
-require __DIR__ . '/Routes/dashboard_user_routes.php';
-
+require APPPATH . 'Config/Routes/profil_route.php';

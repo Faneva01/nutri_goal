@@ -15,28 +15,31 @@ class DashboardUserController extends BaseController
 
     public function index()
     {
-        $userId = session()->get('user_id');
-        $dashboard = $this->dashboardModel->getDashboardData($userId ? (int) $userId : null);
+        //  non connecté → retour au login
+        if (!session()->get('logged')) {
+            return redirect()->to('/login');
+        }
+
+        $userId    = (int) session()->get('user_id');
+        $dashboard = $this->dashboardModel->getDashboardData($userId ?: null);
 
         return view('pages/dashboardUser/dashboard_user', [
-            'title' => 'Dashboard utilisateur',
-            'navView' => 'inc/nav_profil',
-            'user' => $dashboard['user'],
-            'stats' => $dashboard['stats'],
-            'regimes' => $dashboard['regimes'],
-            'historique' => $dashboard['historique'],
+            'title'        => 'Mon tableau de bord | Nutri Goal',
+            'navView'      => 'inc/nav',
+            'user'         => $dashboard['user'],
+            'stats'        => $dashboard['stats'],
+            'regimes'      => $dashboard['regimes'],
+            'historique'   => $dashboard['historique'],
             'weightSeries' => $dashboard['weightSeries'],
             'currentRegime' => $dashboard['currentRegime'],
             'caloriesSeries' => $dashboard['caloriesSeries'],
-            'dbDown' => $dashboard['db_down'] ?? false,
-            'styles' => [
-                'profil-page.css',
+            'dbDown'       => $dashboard['db_down'] ?? false,
+            'styles'       => [
                 'dashboard-user.css',
             ],
-            'scripts' => [
+            'scripts'      => [
                 'dashboard-user.js',
             ],
         ]);
     }
-
 }

@@ -1,0 +1,393 @@
+.site-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #fff;
+    border-bottom: 1px solid #f0ece8;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+}
+
+.site-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    gap: 16px;
+}
+
+/* ─────────────────────────────
+   LOGO
+───────────────────────────── */
+
+.nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 20px;
+    font-weight: 800;
+    color: #E17864;
+    text-decoration: none;
+    flex-shrink: 0;
+}
+
+
+/* ─────────────────────────────
+   NAV LINKS
+───────────────────────────── */
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    padding: 8px 14px;
+
+    border-radius: 8px;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    color: #555;
+    text-decoration: none;
+
+    transition: background 0.2s, color 0.2s;
+
+    white-space: nowrap;
+}
+
+.nav-link i {
+    font-size: 14px;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    background: #FEF0EC;
+    color: #E17864;
+}
+
+/* ─────────────────────────────
+   DROPDOWN
+───────────────────────────── */
+
+.nav-dropdown {
+    position: relative;
+}
+
+.nav-dropdown-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    padding: 8px 14px;
+
+    border: none;
+    border-radius: 8px;
+
+    background: transparent;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    color: #555;
+
+    cursor: pointer;
+
+    transition: background 0.2s, color 0.2s;
+
+    white-space: nowrap;
+}
+
+.nav-dropdown-btn:hover {
+    background: #FEF0EC;
+    color: #E17864;
+}
+
+.dropdown-arrow {
+    font-size: 11px;
+    opacity: 0.7;
+    transition: transform 0.2s;
+}
+
+.nav-dropdown:hover .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+.nav-dropdown-menu {
+    position: absolute;
+
+    top: calc(100% );
+    left: 0;
+
+    min-width: 230px;
+
+    background: #fff;
+
+    border: 1px solid #f2ebe7;
+    border-radius: 14px;
+
+    padding: 8px;
+
+    display: none;
+    flex-direction: column;
+    gap: 2px;
+
+    box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.08),
+        0 2px 6px rgba(0, 0, 0, 0.04);
+
+    z-index: 999;
+}
+
+.nav-dropdown:hover .nav-dropdown-menu {
+    display: flex;
+}
+
+.dropdown-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 10px 12px;
+
+    border-radius: 10px;
+
+    color: #555;
+    text-decoration: none;
+
+    font-size: 14px;
+    font-weight: 500;
+
+    transition: background 0.2s, color 0.2s;
+}
+
+.dropdown-link i {
+    width: 16px;
+    font-size: 13px;
+    color: #E17864;
+    opacity: 0.75;
+}
+
+.dropdown-link:hover {
+    background: #FEF0EC;
+    color: #E17864;
+}
+
+.dropdown-link:hover i {
+    color: #E17864;
+}
+
+/* ─────────────────────────────
+   ACTIONS (SOLDE + LOGOUT)
+───────────────────────────── */
+
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    margin-left: 8px;
+    padding-left: 12px;
+
+    border-left: 1px solid #f0ece8;
+}
+
+.nav-solde {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    padding: 6px 12px;
+
+    background: #f8f4f1;
+    border-radius: 20px;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    color: #555;
+}
+
+.nav-solde i {
+    color: #FAB863;       /* or/accent — cohérent avec l'icône coins */
+}
+
+/* ─────────────────────────────
+   BUTTON REGISTER
+───────────────────────────── */
+
+.btn-nav-register {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    padding: 9px 16px;
+
+    background: #E17864;
+    color: #fff;
+
+    border-radius: 8px;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    text-decoration: none;
+
+    transition:
+        background 0.2s,
+        transform 0.15s;
+}
+
+.btn-nav-register:hover {
+    background: #d06554;
+    transform: translateY(-1px);
+}
+
+/* ─────────────────────────────
+   BUTTON LOGOUT
+───────────────────────────── */
+
+.btn-nav-logout {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    padding: 8px 14px;
+
+    border-radius: 8px;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    color: #888;
+    text-decoration: none;
+
+    transition: background 0.2s, color 0.2s;
+}
+
+.btn-nav-logout:hover {
+    background: #fff0ee;
+    color: #E17864;
+}
+
+/* ─────────────────────────────
+   BURGER BUTTON
+───────────────────────────── */
+
+.nav-burger {
+    display: none;
+
+    align-items: center;
+    justify-content: center;
+
+    width: 42px;
+    height: 42px;
+
+    border: none;
+    border-radius: 10px;
+
+    background: transparent;
+
+    color: #555;
+    font-size: 20px;
+
+    cursor: pointer;
+
+    transition: background 0.2s, color 0.2s;
+}
+
+.nav-burger:hover {
+    background: #FEF0EC;
+    color: #E17864;
+}
+
+/* ─────────────────────────────
+   RESPONSIVE
+───────────────────────────── */
+
+@media (max-width: 768px) {
+
+    .site-nav {
+        position: relative;
+    }
+
+    .nav-burger {
+        display: flex;
+    }
+
+    .nav-links {
+        display: none;
+    }
+
+    .nav-links.open {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+
+        position: absolute;
+
+        top: 72px;
+        left: 0;
+        right: 0;
+
+        padding: 16px;
+
+        background: #fff;
+
+        border-bottom: 1px solid #f0ece8;
+
+        box-shadow:
+            0 10px 30px rgba(0, 0, 0, 0.08),
+            0 2px 6px rgba(0, 0, 0, 0.04);
+
+        z-index: 999;
+    }
+
+    .nav-link,
+    .nav-dropdown-btn,
+    .btn-nav-register,
+    .btn-nav-logout {
+        width: 100%;
+    }
+
+    .nav-dropdown {
+        width: 100%;
+    }
+
+    .nav-dropdown-menu {
+        position: static;
+
+        display: flex;
+
+        margin-top: 6px;
+        margin-left: 12px;
+
+        border: none;
+        box-shadow: none;
+
+        background: #faf7f5;
+    }
+
+    .nav-actions {
+        flex-direction: column;
+        align-items: stretch;
+
+        border-left: none;
+        border-top: 1px solid #f0ece8;
+
+        padding-left: 0;
+        padding-top: 12px;
+
+        margin-left: 0;
+        margin-top: 8px;
+    }
+
+    .nav-solde {
+        justify-content: center;
+    }
+}

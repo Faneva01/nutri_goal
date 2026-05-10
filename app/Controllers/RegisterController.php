@@ -14,31 +14,33 @@ class RegisterController extends BaseController
         $this->userModel = new UserModel();
     }
 
-    // PAGE REGISTER
     public function index()
     {
+        // Déjà connecté → rediriger directement
+        if (session()->get('logged')) {
+            return redirect()->to('/dashboard');
+        }
+
         return view("pages/auth/register", [
-            "title" => "Inscription | Nutri Goal",
+            "title"      => "Inscription | Nutri Goal",
             "show_navbar" => false,
-            "styles" => ["auth/auth.css"],
-            "scripts" => ["auth/register.js"]
+            "styles"     => ["auth/auth.css"],
+            "scripts"    => ["auth/register.js"]
         ]);
     }
 
     // AJAX VALIDATION FIELD BY FIELD
-    public function validationInput() {
+    public function validationInput()
+    {
         try {
-
-            $input = $this->request->getPost('input');
-            $value = $this->request->getPost('value');
-
+            $input  = $this->request->getPost('input');
+            $value  = $this->request->getPost('value');
             $errors = [];
 
             switch ($input) {
-
                 case 'nom_complet':
-                    if (strlen($value) < 3) $errors[] = "Nom trop court";
-                    if (strlen($value) > 100) $errors[] = "Nom trop long";
+                    if (strlen($value) < 3)   $errors[] = "Nom trop court";
+                    if (strlen($value) > 100)  $errors[] = "Nom trop long";
                     break;
 
                 case 'email':
@@ -56,9 +58,7 @@ class RegisterController extends BaseController
                     break;
 
                 case 'mot_de_passe':
-                    if (strlen($value) < 6) {
-                        $errors[] = "Mot de passe trop faible";
-                    }
+                    if (strlen($value) < 6) $errors[] = "Mot de passe trop faible";
                     break;
 
                 case 'taille':
@@ -77,24 +77,17 @@ class RegisterController extends BaseController
                     $errors[] = "Champ inconnu";
             }
 
-            return $this->response
-                ->setStatusCode(200)
-                ->setJSON([
-                    'valid' => empty($errors),
-                    'errors' => $errors
-                ]);
+            return $this->response->setStatusCode(200)->setJSON([
+                'valid'  => empty($errors),
+                'errors' => $errors
+            ]);
 
         } catch (\Throwable $e) {
-
-            // LOG ERREUR RÉELLE (important)
             log_message('error', $e->getMessage());
-
-            return $this->response
-                ->setStatusCode(500)
-                ->setJSON([
-                    'valid' => false,
-                    'errors' => ["Erreur serveur: " . $e->getMessage()]
-                ]);
+            return $this->response->setStatusCode(500)->setJSON([
+                'valid'  => false,
+                'errors' => ["Erreur serveur: " . $e->getMessage()]
+            ]);
         }
     }
 
@@ -111,7 +104,6 @@ class RegisterController extends BaseController
             'solde'        => 0
         ];
 
-        // VALIDATION MODEL
         if (!$this->userModel->validate($data)) {
             return $this->response->setJSON([
                 'success' => false,
@@ -120,23 +112,30 @@ class RegisterController extends BaseController
         }
 
         try {
-
             $id = $this->userModel->insert($data);
 
             if (!$id) {
                 throw new \Exception("Insertion échouée");
             }
 
+            // Connecter automatiquement après inscription
+            $user = $this->userModel->find($id);
+            session()->set([
+                'user_id'     => $user['id'],
+                'nom_complet' => $user['nom_complet'],
+                'email'       => $user['email'],
+                'logged'      => true
+            ]);
+
             return $this->response->setJSON([
-                'success' => true,
-                'message' => "Compte créé avec succès",
-                'user_id' => $id
+                'success'  => true,
+                'message'  => "Compte créé avec succès",
+                'user_id'  => $id,
+                'redirect' => base_url('/dashboard')
             ]);
 
         } catch (\Throwable $e) {
-
             log_message('error', $e->getMessage());
-
             return $this->response->setJSON([
                 'success' => false,
                 'message' => $e->getMessage()

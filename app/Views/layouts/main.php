@@ -2,7 +2,7 @@
 $title = $title ?? 'Nutri Goal';
 $styles = $styles ?? [];
 $scripts = $scripts ?? [];
-$navView = $navView ?? 'inc/nav';
+$navView = $navView ?? 'inc/nav_profil';
 $show_navbar = $show_navbar ?? true;
 ?>
 

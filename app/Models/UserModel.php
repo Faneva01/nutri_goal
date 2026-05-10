@@ -11,7 +11,6 @@ class UserModel extends Model {
     protected $useAutoIncrement = true;
     protected $protectFields    = true;
 
-    // CHAMPS AUTORISÉS
     protected $allowedFields = [
         'nom_complet',
         'email',
@@ -23,10 +22,8 @@ class UserModel extends Model {
         'solde'
     ];
 
-    // TIMESTAMPS
     protected $useTimestamps = false;
 
-    // VALIDATION
     protected $validationRules = [
         'nom_complet'  => 'required|min_length[3]|max_length[100]',
         'email'        => 'required|valid_email|is_unique[utilisateurs.email]',
@@ -42,36 +39,11 @@ class UserModel extends Model {
         ]
     ];
 
-    // CALLBACKS
-    protected $beforeInsert = ['hashPassword', 'calculateIMC'];
-    protected $beforeUpdate = ['hashPassword', 'calculateIMC'];
+    protected $beforeInsert = ['calculateIMC'];
+    protected $beforeUpdate = ['calculateIMC'];
 
-    /**
-     * HASH PASSWORD
-     */
-    protected function hashPassword(array $data) {
-        if (!isset($data['data']['mot_de_passe'])) {
-            return $data;
-        }
-
-        $password = $data['data']['mot_de_passe'];
-
-        // PHP 8+ : texte clair → algoName "unknown" ; hash bcrypt → "bcrypt". Ne pas utiliser algo !== 0 (null pour le clair).
-        if (password_get_info($password)['algoName'] !== 'unknown') {
-            return $data;
-        }
-
-        $data['data']['mot_de_passe'] = password_hash($password, PASSWORD_DEFAULT);
-
-        return $data;
-    }
-
-    /**
-     * CALCUL IMC
-     */
     protected function calculateIMC(array $data) {
         if (isset($data['data']['taille'], $data['data']['poids'])) {
-
             $taille = $data['data']['taille'];
             $poids  = $data['data']['poids'];
 
@@ -83,7 +55,6 @@ class UserModel extends Model {
         return $data;
     }
 
-    // AUTH LOGIN
     public function authenticate(string $email, string $password) {
         $user = $this->where('email', $email)->first();
 
@@ -98,11 +69,7 @@ class UserModel extends Model {
         return $user;
     }
 
-    // GET USER (email comparée en insensible à la casse)
-    public function getUserByEmail(string $email): ?array
-    {
-        $email = strtolower(trim($email));
-
-        return $this->where('LOWER(email)', $email)->first();
+    public function getUserByEmail(string $email) {
+        return $this->where('email', $email)->first();
     }
 }

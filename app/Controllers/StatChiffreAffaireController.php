@@ -78,7 +78,7 @@ class StatChiffreAffaireController extends BaseController
             return $this->response->setStatusCode(401)->setJSON(['error' => 'Unauthorized']);
         }
 
-        $db = \\Config\\Database::connect();
+        $db = \Config\Database::connect();
         $transactions = $db->table('historique_transactions');
 
         $rows = $transactions
@@ -115,7 +115,7 @@ class StatChiffreAffaireController extends BaseController
             return $this->response->setStatusCode(401)->setJSON(['error' => 'Unauthorized']);
         }
 
-        $db = \\Config\\Database::connect();
+        $db = \Config\Database::connect();
         $transactions = $db->table('historique_transactions');
 
         $totalRevenue = (float) ($db->table('historique_transactions')->selectSum('montant')->get()->getRow()->montant ?? 0);

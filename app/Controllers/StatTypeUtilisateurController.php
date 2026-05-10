@@ -59,7 +59,7 @@ class StatTypeUtilisateurController extends BaseController
             return $this->response->setStatusCode(401)->setJSON(['error' => 'Unauthorized']);
         }
 
-        $db = \\Config\\Database::connect();
+        $db = \Config\Database::connect();
         $totalUsers = (int) $db->table('utilisateurs')->countAll();
         $goldUsers = (int) $db->table('utilisateurs')->where('option_gold', 1)->countAllResults();
         $simpleUsers = max(0, $totalUsers - $goldUsers);

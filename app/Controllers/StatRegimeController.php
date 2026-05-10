@@ -32,7 +32,7 @@ class StatRegimeController extends BaseController
             return $this->response->setStatusCode(401)->setJSON(['error' => 'Unauthorized']);
         }
 
-        $db = \\Config\\Database::connect();
+        $db = \Config\Database::connect();
         $rows = $db->table('abonnements_regimes ar')
             ->select('r.nom AS regime, COUNT(ar.id) AS total')
             ->join('regimes r', 'r.id = ar.regime_id')
@@ -64,7 +64,7 @@ class StatRegimeController extends BaseController
             return $this->response->setStatusCode(401)->setJSON(['error' => 'Unauthorized']);
         }
 
-        $db = \\Config\\Database::connect();
+        $db = \Config\Database::connect();
         $rows = $db->table('regime_activite ra')
             ->select('a.nom AS activite, COUNT(ra.id) AS total')
             ->join('activites_sportives a', 'a.id = ra.activite_id')
@@ -98,7 +98,7 @@ class StatRegimeController extends BaseController
             return $this->response->setStatusCode(401)->setJSON(['error' => 'Unauthorized']);
         }
 
-        $db = \\Config\\Database::connect();
+        $db = \Config\Database::connect();
         $regimes = $db->table('regimes r')
             ->select('r.nom AS name, COUNT(ar.id) AS users')
             ->join('abonnements_regimes ar', 'ar.regime_id = r.id')

@@ -8,18 +8,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const googleBtn = document.getElementById("googleBtn");
     const facebookBtn = document.getElementById("facebookBtn");
 
-    // TOGGLE PASSWORD (icônes SVG dans le bouton)
-    const eyeOpen = toggleBtn?.querySelector(".js-eye-open");
-    const eyeShut = toggleBtn?.querySelector(".js-eye-shut");
-    if (toggleBtn && pass) {
+    // TOGGLE PASSWORD
+    if (toggleBtn) {
         toggleBtn.addEventListener("click", (e) => {
             e.preventDefault();
-            const showPlain = pass.type === "password";
-            pass.type = showPlain ? "text" : "password";
-            eyeOpen?.classList.toggle("hidden", showPlain);
-            eyeShut?.classList.toggle("hidden", !showPlain);
-            toggleBtn.setAttribute("aria-label", showPlain ? "Masquer le mot de passe" : "Afficher le mot de passe");
-            toggleBtn.setAttribute("aria-pressed", showPlain ? "true" : "false");
+            const isPassword = pass.type === "password";
+            pass.type = isPassword ? "text" : "password";
+            toggleBtn.innerHTML = isPassword 
+                ? '<i class="fas fa-eye-slash"></i>' 
+                : '<i class="fas fa-eye"></i>';
         });
     }
 

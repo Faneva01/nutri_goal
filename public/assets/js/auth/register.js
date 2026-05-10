@@ -10,7 +10,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("registerForm");
 
     const pass = document.getElementById("mot_de_passe");
+    const confirm = document.getElementById("confirm_password");
     const toggle1 = document.getElementById("togglePassword1");
+    const toggle2 = document.getElementById("togglePassword2");
 
     // INPUTS
     const nom = document.getElementById("nom_complet");
@@ -18,18 +20,27 @@ document.addEventListener("DOMContentLoaded", () => {
     const taille = document.getElementById("taille");
     const poids = document.getElementById("poids");
 
-    // TOGGLE PASSWORD
-    const eyeOpen1 = toggle1?.querySelector(".js-eye-open");
-    const eyeShut1 = toggle1?.querySelector(".js-eye-shut");
-    if (toggle1 && pass) {
+    // TOGGLE PASSWORD 1
+    if (toggle1) {
         toggle1.addEventListener("click", (e) => {
             e.preventDefault();
-            const showPlain = pass.type === "password";
-            pass.type = showPlain ? "text" : "password";
-            eyeOpen1?.classList.toggle("hidden", showPlain);
-            eyeShut1?.classList.toggle("hidden", !showPlain);
-            toggle1.setAttribute("aria-label", showPlain ? "Masquer le mot de passe" : "Afficher le mot de passe");
-            toggle1.setAttribute("aria-pressed", showPlain ? "true" : "false");
+            const isPassword = pass.type === "password";
+            pass.type = isPassword ? "text" : "password";
+            toggle1.innerHTML = isPassword 
+                ? '<i class="fas fa-eye-slash"></i>' 
+                : '<i class="fas fa-eye"></i>';
+        });
+    }
+
+    // TOGGLE PASSWORD 2
+    if (toggle2) {
+        toggle2.addEventListener("click", (e) => {
+            e.preventDefault();
+            const isPassword = confirm.type === "password";
+            confirm.type = isPassword ? "text" : "password";
+            toggle2.innerHTML = isPassword 
+                ? '<i class="fas fa-eye-slash"></i>' 
+                : '<i class="fas fa-eye"></i>';
         });
     }
 
@@ -38,6 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
         nom_complet: true,
         email: true,
         mot_de_passe: true,
+        confirm: true,
         genre: true,
         taille: true,
         poids: true
@@ -47,6 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return !errors.nom_complet &&
                !errors.email &&
                !errors.mot_de_passe &&
+               !errors.confirm &&
                !errors.genre;
     }
 
@@ -90,7 +103,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     return JSON.parse(text);
                 } catch (e) {
                     console.error("REPONSE BRUTE SERVER:", text);
-                    throw new Error(text);
+                    throw new Error(text); 
                 }
             })
             .then(data => {
@@ -123,6 +136,17 @@ document.addEventListener("DOMContentLoaded", () => {
             return true;
         }
 
+        if (fieldName === "confirm") {
+            if (value !== pass.value) {
+                showError("confirm", "Les mots de passe ne correspondent pas");
+                errors.confirm = true;
+                return false;
+            }
+            clearError("confirm");
+            errors.confirm = false;
+            return true;
+        }
+
         if (fieldName === "genre") {
             const genre = document.querySelector('input[name="genre"]:checked');
             if (!genre) {
@@ -147,8 +171,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         if (fieldName === "poids") {
-            const n = Number(value);
-            if (value === "" || Number.isNaN(n) || n < 20 || n > 300) {
+            if (!value || !Number.isInteger(Number(value)) || value < 20 || value > 300) {
                 showError("poids", "Poids invalide");
                 errors.poids = true;
                 return false;
@@ -164,9 +187,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // VALIDATE STEP 1 (ALL FIELDS)
     async function validateStep1Complete() {
         clearGlobal();
-
+        
         validateFieldLocal("genre", "");
         validateFieldLocal("mot_de_passe", pass.value);
+        validateFieldLocal("confirm", confirm.value);
         validateFieldLocal("taille", taille.value);
         validateFieldLocal("poids", poids.value);
 
@@ -198,6 +222,11 @@ document.addEventListener("DOMContentLoaded", () => {
     // PASSWORD - BLUR
     pass.addEventListener("blur", () => {
         validateFieldLocal("mot_de_passe", pass.value);
+    });
+
+    // CONFIRM - BLUR
+    confirm.addEventListener("blur", () => {
+        validateFieldLocal("confirm", confirm.value);
     });
 
     // GENRE - CHANGE

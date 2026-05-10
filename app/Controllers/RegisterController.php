@@ -17,10 +17,6 @@ class RegisterController extends BaseController
     // PAGE REGISTER
     public function index()
     {
-        if (session()->get('logged') || session()->get('user_id')) {
-            return redirect()->to('/dashboard');
-        }
-
         return view("pages/auth/register", [
             "title" => "Inscription | Nutri Goal",
             "show_navbar" => false,
@@ -46,10 +42,9 @@ class RegisterController extends BaseController
                     break;
 
                 case 'email':
-                    $value = strtolower(trim((string) $value));
                     if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
                         $errors[] = "Email invalide";
-                    } elseif ($this->userModel->getUserByEmail($value)) {
+                    } elseif ($this->userModel->where('email', $value)->first()) {
                         $errors[] = "Email déjà utilisé";
                     }
                     break;
@@ -108,12 +103,11 @@ class RegisterController extends BaseController
     {
         $data = [
             'nom_complet'  => $this->request->getPost('nom_complet'),
-            'email'        => strtolower(trim((string) $this->request->getPost('email'))),
-            'mot_de_passe' => $this->request->getPost('mot_de_passe'),
+            'email'        => $this->request->getPost('email'),
+            'mot_de_passe' => password_hash($this->request->getPost('mot_de_passe'), PASSWORD_BCRYPT),
             'genre'        => $this->request->getPost('genre'),
             'taille'       => $this->request->getPost('taille'),
             'poids'        => $this->request->getPost('poids'),
-            'option_gold'  => 0,
             'solde'        => 0
         ];
 

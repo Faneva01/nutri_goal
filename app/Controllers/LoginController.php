@@ -16,10 +16,6 @@ class LoginController extends BaseController
 
     public function index()
     {
-        if (session()->get('logged') || session()->get('user_id')) {
-            return redirect()->to('/dashboard');
-        }
-
         return view("pages/auth/login", [
             "title" => "Connexion | Nutri Goal",
             "show_navbar" => false,
@@ -30,8 +26,8 @@ class LoginController extends BaseController
 
     public function login()
     {
-        $email = strtolower(trim((string) $this->request->getPost('email')));
-        $password = (string) $this->request->getPost('mot_de_passe');
+        $email = $this->request->getPost('email');
+        $password = $this->request->getPost('mot_de_passe');
 
         $user = $this->userModel->getUserByEmail($email);
 
@@ -44,16 +40,7 @@ class LoginController extends BaseController
             ]);
         }
 
-        $stored = $user['mot_de_passe'];
-        $ok = password_verify($password, $stored);
-
-        // Comptes créés avec l'ancien bug (mot de passe en clair en base) : migrer vers un hash
-        if (! $ok && password_get_info($stored)['algoName'] === 'unknown' && hash_equals($stored, $password)) {
-            $this->userModel->skipValidation(true)->update($user['id'], ['mot_de_passe' => $password]);
-            $ok = true;
-        }
-
-        if (! $ok) {
+        if (!password_verify($password, $user['mot_de_passe'])) {
             return $this->response->setJSON([
                 'success' => false,
                 'errors' => [
@@ -72,5 +59,11 @@ class LoginController extends BaseController
             'success' => true,
             'message' => 'Connexion réussie'
         ]);
+    }
+
+    public function logout()
+    {
+        session()->destroy();
+        return redirect()->to('/login');
     }
 }

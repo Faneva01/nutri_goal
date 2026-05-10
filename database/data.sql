@@ -1,4 +1,3 @@
-
 -- Insertion de 5 utilisateurs
 INSERT INTO utilisateurs (nom, prenom, email, mot_de_passe, genre, taille, poids, option_gold, solde) VALUES
 ('Dupont', 'Alice', 'alice.dupont@mail.com', '$2y$10$KIXwichNV7LvzVTzVVWKVuFJFqFMhfXO0gZPqO9wLAK5pF8yZEjYa', 'F', 165, 72.5, FALSE, 50.00),
@@ -32,37 +31,3 @@ INSERT INTO prix_regimes (regime_id, duree_jours, prix) VALUES
 (5, 7, 44.99),
 (5, 30, 134.99),
 (5, 90, 359.99);
-
--- Insertion de 5 activités sportives
-INSERT INTO activites_sportives (nom, description, duree_minutes, intensite, calories_brulees) VALUES
-('Course à pied', 'Course modérée sur route ou tapis roulant', 30, 'modere', 300),
-('Musculation', 'Entraînement avec poids et haltères', 45, 'intense', 350),
-('Natation', 'Nage libre ou autres styles de nage', 45, 'modere', 400),
-('Yoga', 'Étirements et relaxation', 60, 'faible', 150),
-('Vélo', 'Cyclisme d''endurance en plein air', 60, 'modere', 450);
-
--- Insertion de 15 codes solde
-INSERT INTO codes_solde (code, montant) VALUES
-('CODE2024001', 10.00),
-('CODE2024002', 20.00),
-('CODE2024003', 15.00),
-('CODE2024004', 25.00),
-('CODE2024005', 30.00),
-('CODE2024006', 10.00),
-('CODE2024007', 50.00),
-('CODE2024008', 5.00),
-('CODE2024009', 20.00),
-('CODE2024010', 15.00),
-('CODE2024011', 25.00),
-('CODE2024012', 35.00),
-('CODE2024013', 10.00),
-('CODE2024014', 40.00),
-('CODE2024015', 20.00);
-
--- Insertion d'objectifs pour les utilisateurs
-INSERT INTO objectifs (utilisateur_id, type_objectif, poids_cible) VALUES
-(1, 'reduire_poids', 65.0),
-(2, 'augmenter_poids', 95.0),
-(3, 'imc_ideal', 65.0),
-(4, 'reduire_poids', 80.0),
-(5, 'imc_ideal', 60.0);

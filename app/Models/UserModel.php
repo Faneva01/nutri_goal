@@ -56,12 +56,12 @@ class UserModel extends Model {
 
         $password = $data['data']['mot_de_passe'];
 
-        // éviter double hash
-        if (password_get_info($password)['algo'] !== 0) {
+        // PHP 8+ : texte clair → algoName "unknown" ; hash bcrypt → "bcrypt". Ne pas utiliser algo !== 0 (null pour le clair).
+        if (password_get_info($password)['algoName'] !== 'unknown') {
             return $data;
         }
 
-        $data['data']['mot_de_passe'] = password_hash($password, PASSWORD_BCRYPT);
+        $data['data']['mot_de_passe'] = password_hash($password, PASSWORD_DEFAULT);
 
         return $data;
     }
@@ -98,8 +98,11 @@ class UserModel extends Model {
         return $user;
     }
 
-    // GET USER
-    public function getUserByEmail(string $email) {
-        return $this->where('email', $email)->first();
+    // GET USER (email comparée en insensible à la casse)
+    public function getUserByEmail(string $email): ?array
+    {
+        $email = strtolower(trim($email));
+
+        return $this->where('LOWER(email)', $email)->first();
     }
 }

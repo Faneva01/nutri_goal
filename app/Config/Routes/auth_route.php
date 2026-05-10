@@ -3,15 +3,17 @@
 use CodeIgniter\Router\RouteCollection;
 
 /**
+ * Authentification — la racine du site (/) affiche la page de connexion.
+ *
  * @var RouteCollection $routes
  */
 
-// Register
-$routes->get('/register', 'RegisterController::index');
-$routes->post('/auth/validation-input', 'RegisterController::validationInput');
-$routes->post('/register', 'RegisterController::store');
+// Connexion : première page du site + alias /login
+$routes->get('/', 'LoginController::index');
+$routes->get('login', 'LoginController::index');
+$routes->post('login', 'LoginController::login');
 
-
-// Login
-$routes->get('/login', 'LoginController::index');
-$routes->post('/login', 'LoginController::login');
+// Inscription
+$routes->get('register', 'RegisterController::index');
+$routes->post('register', 'RegisterController::store');
+$routes->post('auth/validation-input', 'RegisterController::validationInput');

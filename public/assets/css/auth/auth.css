@@ -244,6 +244,14 @@
     color: #E17864;
 }
 
+.toggle-password .hidden {
+    display: none;
+}
+
+.toggle-password svg {
+    flex-shrink: 0;
+}
+
 /* AUTH DIVIDER */
 .auth-divider {
     display: flex;

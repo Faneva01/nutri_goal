@@ -104,11 +104,10 @@ class RegisterController extends BaseController
         $data = [
             'nom_complet'  => $this->request->getPost('nom_complet'),
             'email'        => $this->request->getPost('email'),
-            'mot_de_passe' => $this->request->getPost('mot_de_passe'),
+            'mot_de_passe' => password_hash($this->request->getPost('mot_de_passe'), PASSWORD_BCRYPT),
             'genre'        => $this->request->getPost('genre'),
             'taille'       => $this->request->getPost('taille'),
             'poids'        => $this->request->getPost('poids'),
-            'option_gold'  => 0,
             'solde'        => 0
         ];
 

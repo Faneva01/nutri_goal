@@ -1,0 +1,212 @@
+:root {
+    --admin-bg: #f5f6fb;
+    --admin-sidebar: #152238;
+    --admin-sidebar-alt: #1d2a4e;
+    --admin-sidebar-text: #cfd2e4;
+    --admin-sidebar-active: #ffffff;
+    --admin-accent: #f07050;
+    --admin-accent-soft: rgba(240, 112, 80, 0.15);
+    --admin-surface: #ffffff;
+    --admin-border: rgba(18, 26, 56, 0.1);
+}
+
+.admin-shell {
+    display: flex;
+    min-height: 100vh;
+    background: var(--admin-bg);
+}
+
+.admin-sidebar {
+    width: 260px;
+    background: var(--admin-sidebar);
+    color: var(--admin-sidebar-text);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 24px 18px;
+    gap: 24px;
+}
+
+.admin-sidebar-top {
+    margin-bottom: 24px;
+}
+
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--admin-sidebar-text);
+}
+
+.sidebar-logo {
+    width: 46px;
+    height: 46px;
+    background: var(--admin-accent);
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    color: white;
+    font-size: 18px;
+}
+
+.sidebar-brand strong {
+    display: block;
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.sidebar-brand small {
+    display: block;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 12px;
+}
+
+.admin-sidebar-nav {
+    display: grid;
+    gap: 10px;
+}
+
+.admin-sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    color: var(--admin-sidebar-text);
+    font-weight: 600;
+    transition: background 0.25s ease, color 0.25s ease;
+}
+
+.admin-sidebar-link:hover,
+.admin-sidebar-link.active {
+    background: rgba(240, 112, 80, 0.16);
+    color: white;
+}
+
+.admin-sidebar-link i {
+    width: 20px;
+    text-align: center;
+}
+
+.admin-sidebar-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 20px;
+}
+
+.admin-sidebar-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.sidebar-user-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    background: rgba(255,255,255,.12);
+    color: white;
+}
+
+.admin-sidebar-user strong {
+    display: block;
+    font-size: 14px;
+}
+
+.admin-sidebar-user small {
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 12px;
+}
+
+.admin-sidebar-logout {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    width: 100%;
+    border-radius: 10px;
+    color: var(--admin-sidebar-text);
+    background: rgba(255,255,255,.06);
+    text-decoration: none;
+    font-weight: 600;
+    transition: background 0.25s ease;
+}
+
+.admin-sidebar-logout:hover {
+    background: rgba(255,255,255,.16);
+}
+
+.admin-page {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-navbar {
+    background: #ffffff;
+    border-bottom: 1px solid rgba(18, 26, 56, 0.08);
+    padding: 0 32px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.admin-content {
+    padding: 24px 32px;
+    min-height: calc(100vh - 60px);
+}
+
+.admin-navbar .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 800;
+    color: var(--admin-accent);
+}
+
+.admin-navbar .logo-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    background: rgba(240, 112, 80, 0.15);
+    color: var(--admin-accent);
+}
+
+@media (max-width: 1200px) {
+    .admin-shell {
+        flex-direction: column;
+    }
+
+    .admin-sidebar {
+        width: 100%;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px;
+    }
+
+    .admin-sidebar-nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        width: 100%;
+    }
+
+    .admin-sidebar-link {
+        flex: 1 1 48%;
+    }
+
+    .admin-navbar {
+        padding: 0 20px;
+    }
+
+    .admin-content {
+        padding: 20px;
+    }
+}

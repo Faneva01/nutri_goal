@@ -190,45 +190,37 @@
       </div>
 
       <!-- CALENDRIER -->
-      <div class="card wallet-card" style="margin-top: 16px;">
-        <div class="wallet-header">
-          <span class="wallet-title">Calendrier utilisateur</span>
+      <div class="card insight-card">
+        <div class="insight-card__head">
+          <h3 class="insight-card__title">Calendrier utilisateur</h3>
         </div>
-        <hr class="divider" />
-        <div class="recharge-section">
-          <label class="recharge-label">Prochain rappel</label>
-          <div><?= esc($prochainRappel ?? 'Aucun rappel programme') ?></div>
+        <div class="insight-card__body">
+          <p class="insight-card__label">Prochain rappel</p>
+          <p class="insight-card__highlight"><?= esc($prochainRappel ?? 'Aucun rappel programmé') ?></p>
         </div>
       </div>
 
-      <!-- HISTORIQUE ACTIVITE -->
-      <div class="card wallet-card" style="margin-top: 16px;">
-        <div class="wallet-header">
-          <span class="wallet-title">Historique activite utilisateur</span>
+      <!-- HISTORIQUE ACTIVITÉ -->
+      <div class="card insight-card">
+        <div class="insight-card__head">
+          <h3 class="insight-card__title">Historique d'activité</h3>
         </div>
-        <hr class="divider" />
-        <div class="recharge-section">
+        <div class="insight-card__body">
           <?php if (!empty($historiqueActivites) && is_array($historiqueActivites)): ?>
-            <?php foreach ($historiqueActivites as $item): ?>
-              <div class="recharge-row" style="justify-content: space-between;">
-                <span><?= esc($item['date'] ?? '-') ?> - <?= esc($item['label'] ?? '-') ?></span>
-                <strong><?= esc($item['valeur'] ?? '-') ?></strong>
-              </div>
-            <?php endforeach; ?>
+            <ul class="activity-list" role="list">
+              <?php foreach ($historiqueActivites as $item): ?>
+                <li class="activity-item">
+                  <div class="activity-item__text">
+                    <time class="activity-item__date" datetime="<?= esc($item['date'] ?? '') ?>"><?= esc($item['date'] ?? '—') ?></time>
+                    <span class="activity-item__name"><?= esc($item['label'] ?? '—') ?></span>
+                  </div>
+                  <span class="activity-item__metric"><?= esc($item['valeur'] ?? '—') ?></span>
+                </li>
+              <?php endforeach; ?>
+            </ul>
           <?php else: ?>
-            <span class="code-feedback">Aucune activite enregistree.</span>
+            <p class="insight-card__empty">Aucune activité enregistrée.</p>
           <?php endif; ?>
-        </div>
-      </div>
-
-      <!-- EXPORT PDF -->
-      <div class="card wallet-card" style="margin-top: 16px;">
-        <div class="wallet-header">
-          <span class="wallet-title">Export informations utilisateur PDF</span>
-        </div>
-        <hr class="divider" />
-        <div class="recharge-section">
-          <button class="valider-btn" type="button" onclick="window.print()">Exporter en PDF</button>
         </div>
       </div>
 

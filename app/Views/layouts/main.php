@@ -3,6 +3,7 @@ $title = $title ?? 'Nutri Goal';
 $styles = $styles ?? [];
 $scripts = $scripts ?? [];
 $navView = $navView ?? 'inc/nav';
+$show_navbar = $show_navbar ?? true;
 ?>
 
 <!DOCTYPE html>
@@ -27,8 +28,10 @@ $navView = $navView ?? 'inc/nav';
 
 <body>
 
-    <!-- NAV (composant global) -->
-    <?= view($navView, ['user' => $user ?? null]) ?>
+    <?php if ($show_navbar): ?>
+        <!-- NAV (composant global) -->
+        <?= view($navView, ['user' => $user ?? null]) ?>
+    <?php endif; ?>
 
     <!-- CONTENU PAGE -->
     <?= $this->renderSection('content') ?>

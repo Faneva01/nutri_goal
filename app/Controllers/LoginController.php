@@ -16,17 +16,22 @@ class LoginController extends BaseController
 
     public function index()
     {
+        // Déjà connecté → rediriger directement
+        if (session()->get('logged')) {
+            return redirect()->to('/dashboard');
+        }
+
         return view("pages/auth/login", [
-            "title" => "Connexion | Nutri Goal",
+            "title"      => "Connexion | Nutri Goal",
             "show_navbar" => false,
-            "styles" => ["auth/auth.css"], 
-            "scripts" => ["auth/login.js"]
+            "styles"     => ["auth/auth.css"],
+            "scripts"    => ["auth/login.js"]
         ]);
     }
 
     public function login()
     {
-        $email = $this->request->getPost('email');
+        $email    = $this->request->getPost('email');
         $password = $this->request->getPost('mot_de_passe');
 
         $user = $this->userModel->getUserByEmail($email);
@@ -34,30 +39,30 @@ class LoginController extends BaseController
         if (!$user) {
             return $this->response->setJSON([
                 'success' => false,
-                'errors' => [
-                    'email' => 'Email introuvable'
-                ]
+                'errors'  => ['email' => 'Email introuvable']
             ]);
         }
 
         if (!password_verify($password, $user['mot_de_passe'])) {
             return $this->response->setJSON([
                 'success' => false,
-                'errors' => [
-                    'mot_de_passe' => 'Mot de passe incorrect'
-                ]
+                'errors'  => ['mot_de_passe' => 'Mot de passe incorrect']
             ]);
         }
 
         session()->set([
-            'user_id' => $user['id'],
-            'email'   => $user['email'],
-            'logged'  => true
+            'user_id'    => $user['id'],
+            'nom_complet' => $user['nom_complet'],
+            'email'      => $user['email'],
+            'solde' => $user['solde'],
+            'logged'     => true
         ]);
 
+        // redirect renvoyé pour que le JS puisse rediriger
         return $this->response->setJSON([
-            'success' => true,
-            'message' => 'Connexion réussie'
+            'success'  => true,
+            'message'  => 'Connexion réussie',
+            'redirect' => base_url('/dashboard')
         ]);
     }
 

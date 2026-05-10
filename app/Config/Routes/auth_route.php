@@ -15,3 +15,6 @@ $routes->post('/register', 'RegisterController::store');
 // Login
 $routes->get('/login', 'LoginController::index');
 $routes->post('/login', 'LoginController::login');
+
+// Logout
+$routes->get('/logout', 'LoginController::logout');

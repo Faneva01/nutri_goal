@@ -16,6 +16,7 @@ $show_navbar = $show_navbar ?? true;
 
     <!-- CSS global -->
     <link rel="stylesheet" href="<?= css_url('style.css') ?>">
+    <link rel="stylesheet" href="<?= css_url('nav.css') ?>">
 
     <!-- CSS spécifiques page -->
     <?php foreach ($styles as $style): ?>

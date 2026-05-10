@@ -28,21 +28,39 @@ class StatChiffreAffaireController extends BaseController
      */
     public function getChartData()
     {
-        // Vérifier que l'utilisateur est connecté en tant qu'admin
         if (!session()->get('admin_logged_in')) {
             return $this->response->setStatusCode(401)->setJSON(['error' => 'Unauthorized']);
         }
 
-        // TODO: Remplacer par une vraie requête base de données
-        // Récupérer les données des 30 derniers jours
-        $chartData = [
-            'labels' => [],
+        $db = \Config\Database::connect();
+        $transactions = $db->table('historique_transactions');
+
+        $labels = [];
+        $data = [];
+
+        for ($i = 29; $i >= 0; $i--) {
+            $date = date('Y-m-d', strtotime("-{$i} days"));
+            $labels[] = date('d/m', strtotime($date));
+
+            $amount = $transactions
+                ->selectSum('montant')
+                ->where('DATE(date_transaction)', $date)
+                ->get()
+                ->getRow()
+                ->montant ?? 0;
+
+            $data[] = (float) $amount;
+            $transactions->resetQuery();
+        }
+
+        return $this->response->setJSON([
+            'labels' => $labels,
             'datasets' => [
                 [
                     'label' => 'Chiffre d\'Affaires (Ar)',
-                    'data' => [],
+                    'data' => $data,
                     'borderColor' => '#28a745',
-                    'backgroundColor' => 'rgba(40, 167, 69, 0.1)',
+                    'backgroundColor' => 'rgba(40, 167, 69, 0.12)',
                     'tension' => 0.3,
                     'fill' => true,
                     'pointBackgroundColor' => '#28a745',
@@ -51,82 +69,82 @@ class StatChiffreAffaireController extends BaseController
                     'pointRadius' => 4
                 ]
             ]
-        ];
-
-        // Générer données pour 30 jours
-        for ($i = 29; $i >= 0; $i--) {
-            $date = date('d/m', strtotime("-{$i} days"));
-            $chartData['labels'][] = $date;
-            $chartData['datasets'][0]['data'][] = rand(1500, 8000);
-        }
-
-        return $this->response->setJSON($chartData);
+        ]);
     }
 
-    /**
-     * API: Récupère les données par méthode de paiement
-     */
     public function getPaymentMethods()
     {
-        // Vérifier que l'utilisateur est connecté en tant qu'admin
         if (!session()->get('admin_logged_in')) {
             return $this->response->setStatusCode(401)->setJSON(['error' => 'Unauthorized']);
         }
 
-        // TODO: Remplacer par une vraie requête base de données
-        $chartData = [
-            'labels' => ['MVola', 'Airtel Money', 'Orange Money', 'Carte Bancaire'],
+        $db = \\Config\\Database::connect();
+        $transactions = $db->table('historique_transactions');
+
+        $rows = $transactions
+            ->select('type_transaction, SUM(montant) AS total, COUNT(*) AS count')
+            ->groupBy('type_transaction')
+            ->get()
+            ->getResultArray();
+
+        $labels = [];
+        $data = [];
+
+        foreach ($rows as $row) {
+            $labels[] = ucfirst(str_replace('_', ' ', $row['type_transaction']));
+            $data[] = (float) $row['total'];
+        }
+
+        return $this->response->setJSON([
+            'labels' => $labels,
             'datasets' => [
                 [
                     'label' => 'Montant des Transactions',
-                    'data' => [18500, 15200, 22300, 29420.50],
-                    'backgroundColor' => [
-                        '#FF6B35',
-                        '#004E89',
-                        '#1B998B',
-                        '#F7DC6F'
-                    ],
-                    'borderColor' => [
-                        '#E55100',
-                        '#003366',
-                        '#0F6B5C',
-                        '#F39C12'
-                    ],
+                    'data' => $data,
+                    'backgroundColor' => ['#FF6B35', '#004E89', '#1B998B', '#F7DC6F'],
+                    'borderColor' => ['#E55100', '#003366', '#0F6B5C', '#F39C12'],
                     'borderWidth' => 2
                 ]
             ]
-        ];
-
-        return $this->response->setJSON($chartData);
+        ]);
     }
 
-    /**
-     * API: Récupère les statistiques globales de chiffre d'affaires
-     */
     public function getStats()
     {
-        // Vérifier que l'utilisateur est connecté en tant qu'admin
         if (!session()->get('admin_logged_in')) {
             return $this->response->setStatusCode(401)->setJSON(['error' => 'Unauthorized']);
         }
 
-        // TODO: Remplacer par une vraie requête base de données
-        $stats = [
-            'total_revenue' => 85420.50,
-            'revenue_today' => 3250.00,
-            'revenue_this_month' => 85420.50,
-            'revenue_last_month' => 67850.00,
-            'growth' => 25.9,
-            'average_transaction' => 265.20,
-            'total_transactions' => 321,
-            'payment_methods' => [
-                'mvola' => ['count' => 89, 'amount' => 18500],
-                'airtel' => ['count' => 76, 'amount' => 15200],
-                'orange' => ['count' => 92, 'amount' => 22300],
-                'card' => ['count' => 64, 'amount' => 29420.50]
-            ]
-        ];
+        $db = \\Config\\Database::connect();
+        $transactions = $db->table('historique_transactions');
 
-        return $this->response->setJSON($stats);
+        $totalRevenue = (float) ($db->table('historique_transactions')->selectSum('montant')->get()->getRow()->montant ?? 0);
+        $revenueToday = (float) ($db->table('historique_transactions')->selectSum('montant')->where('DATE(date_transaction)', date('Y-m-d'))->get()->getRow()->montant ?? 0);
+        $revenueThisMonth = (float) ($db->table('historique_transactions')->selectSum('montant')->where('MONTH(date_transaction)', date('n'))->where('YEAR(date_transaction)', date('Y'))->get()->getRow()->montant ?? 0);
+        $revenueLastMonth = (float) ($db->table('historique_transactions')->selectSum('montant')->where('MONTH(date_transaction)', date('n', strtotime('-1 month')))->where('YEAR(date_transaction)', date('Y', strtotime('-1 month')))->get()->getRow()->montant ?? 0);
+        $totalTransactions = (int) $db->table('historique_transactions')->countAllResults();
+        $averageTransaction = $totalTransactions > 0 ? round($totalRevenue / $totalTransactions, 2) : 0;
+        $growth = $revenueLastMonth > 0 ? round((($revenueThisMonth - $revenueLastMonth) / $revenueLastMonth) * 100, 1) : 0;
+
+        $paymentRows = $db->table('historique_transactions')->select('type_transaction, SUM(montant) AS total, COUNT(*) AS count')->groupBy('type_transaction')->get()->getResultArray();
+        $paymentMethods = [];
+
+        foreach ($paymentRows as $row) {
+            $paymentMethods[$row['type_transaction']] = [
+                'count' => (int) $row['count'],
+                'amount' => (float) $row['total']
+            ];
+        }
+
+        return $this->response->setJSON([
+            'total_revenue' => $totalRevenue,
+            'revenue_today' => $revenueToday,
+            'revenue_this_month' => $revenueThisMonth,
+            'revenue_last_month' => $revenueLastMonth,
+            'growth' => $growth,
+            'average_transaction' => $averageTransaction,
+            'total_transactions' => $totalTransactions,
+            'payment_methods' => $paymentMethods
+        ]);
     }
 }

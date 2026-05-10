@@ -29,69 +29,53 @@ class StatTypeUtilisateurController extends BaseController
      */
     public function getChartData()
     {
-        // Vérifier que l'utilisateur est connecté en tant qu'admin
         if (!session()->get('admin_logged_in')) {
             return $this->response->setStatusCode(401)->setJSON(['error' => 'Unauthorized']);
         }
 
-        // TODO: Remplacer par une vraie requête base de données
-        // Récupérer les types d'abonnements
-        $chartData = [
-            'labels' => ['Simple', 'Gold', 'Premium'],
+        $db = \Config\Database::connect();
+
+        $totalUsers = (int) $db->table('utilisateurs')->countAll();
+        $goldUsers = (int) $db->table('utilisateurs')->where('option_gold', 1)->countAllResults();
+        $simpleUsers = max(0, $totalUsers - $goldUsers);
+
+        return $this->response->setJSON([
+            'labels' => ['Simple', 'Gold'],
             'datasets' => [
                 [
                     'label' => 'Nombre d\'Utilisateurs',
-                    'data' => [312, 187, 43],
-                    'backgroundColor' => [
-                        '#007bff',  // Blue pour Simple
-                        '#ffc107',  // Gold pour Gold
-                        '#e83e8c'   // Pink pour Premium
-                    ],
-                    'borderColor' => [
-                        '#0056b3',
-                        '#e0a800',
-                        '#c2185b'
-                    ],
+                    'data' => [$simpleUsers, $goldUsers],
+                    'backgroundColor' => ['#007bff', '#ffc107'],
+                    'borderColor' => ['#0056b3', '#e0a800'],
                     'borderWidth' => 2
                 ]
             ]
-        ];
-
-        return $this->response->setJSON($chartData);
+        ]);
     }
 
-    /**
-     * API: Récupère les détails statistiques des types d'utilisateurs
-     */
     public function getDetailedStats()
     {
-        // Vérifier que l'utilisateur est connecté en tant qu'admin
         if (!session()->get('admin_logged_in')) {
             return $this->response->setStatusCode(401)->setJSON(['error' => 'Unauthorized']);
         }
 
-        // TODO: Remplacer par une vraie requête base de données
+        $db = \\Config\\Database::connect();
+        $totalUsers = (int) $db->table('utilisateurs')->countAll();
+        $goldUsers = (int) $db->table('utilisateurs')->where('option_gold', 1)->countAllResults();
+        $simpleUsers = max(0, $totalUsers - $goldUsers);
+
         $stats = [
             'simple' => [
-                'count' => 312,
-                'percentage' => 50.2,
-                'revenue' => 0,
-                'active' => 267,
-                'inactive' => 45
+                'count' => $simpleUsers,
+                'percentage' => $totalUsers > 0 ? round(($simpleUsers / $totalUsers) * 100, 1) : 0,
+                'active' => $simpleUsers,
+                'inactive' => 0
             ],
             'gold' => [
-                'count' => 187,
-                'percentage' => 30.1,
-                'revenue' => 56100,
-                'active' => 175,
-                'inactive' => 12
-            ],
-            'premium' => [
-                'count' => 43,
-                'percentage' => 6.9,
-                'revenue' => 21500,
-                'active' => 41,
-                'inactive' => 2
+                'count' => $goldUsers,
+                'percentage' => $totalUsers > 0 ? round(($goldUsers / $totalUsers) * 100, 1) : 0,
+                'active' => $goldUsers,
+                'inactive' => 0
             ]
         ];
 

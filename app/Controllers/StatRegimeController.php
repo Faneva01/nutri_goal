@@ -28,136 +28,115 @@ class StatRegimeController extends BaseController
      */
     public function getChartData()
     {
-        // Vérifier que l'utilisateur est connecté en tant qu'admin
         if (!session()->get('admin_logged_in')) {
             return $this->response->setStatusCode(401)->setJSON(['error' => 'Unauthorized']);
         }
 
-        // TODO: Remplacer par une vraie requête base de données
-        $chartData = [
-            'labels' => ['Régime Keto', 'Régime Paleo', 'Régime Vegan', 'Régime Équilibré', 'Régime Low Carb', 'Régime Méditerranéen'],
+        $db = \\Config\\Database::connect();
+        $rows = $db->table('abonnements_regimes ar')
+            ->select('r.nom AS regime, COUNT(ar.id) AS total')
+            ->join('regimes r', 'r.id = ar.regime_id')
+            ->groupBy('r.id')
+            ->orderBy('total', 'DESC')
+            ->get()
+            ->getResultArray();
+
+        $labels = array_column($rows, 'regime');
+        $data = array_map(fn($row) => (int) $row['total'], $rows);
+
+        return $this->response->setJSON([
+            'labels' => $labels,
             'datasets' => [
                 [
-                    'label' => 'Nombre d\'Utilisateurs',
-                    'data' => [142, 98, 76, 215, 56, 189],
-                    'backgroundColor' => [
-                        '#FF6B6B',
-                        '#4ECDC4',
-                        '#45B7D1',
-                        '#FFA07A',
-                        '#98D8C8',
-                        '#F7DC6F'
-                    ],
-                    'borderColor' => [
-                        '#E55039',
-                        '#16A085',
-                        '#2980B9',
-                        '#D35400',
-                        '#1ABC9C',
-                        '#F39C12'
-                    ],
+                    'label' => 'Utilisateurs par régime',
+                    'data' => $data,
+                    'backgroundColor' => ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F'],
+                    'borderColor' => ['#E55039', '#16A085', '#2980B9', '#D35400', '#1ABC9C', '#F39C12'],
                     'borderWidth' => 2
                 ]
             ]
-        ];
-
-        return $this->response->setJSON($chartData);
+        ]);
     }
 
-    /**
-     * API: Récupère les plats populaires
-     */
     public function getDishesChart()
     {
-        // Vérifier que l'utilisateur est connecté en tant qu'admin
         if (!session()->get('admin_logged_in')) {
             return $this->response->setStatusCode(401)->setJSON(['error' => 'Unauthorized']);
         }
 
-        // TODO: Remplacer par une vraie requête base de données
-        $chartData = [
-            'labels' => [],
+        $db = \\Config\\Database::connect();
+        $rows = $db->table('regime_activite ra')
+            ->select('a.nom AS activite, COUNT(ra.id) AS total')
+            ->join('activites_sportives a', 'a.id = ra.activite_id')
+            ->groupBy('a.id')
+            ->orderBy('total', 'DESC')
+            ->limit(10)
+            ->get()
+            ->getResultArray();
+
+        $labels = array_column($rows, 'activite');
+        $data = array_map(fn($row) => (int) $row['total'], $rows);
+
+        return $this->response->setJSON([
+            'labels' => $labels,
             'datasets' => [
                 [
-                    'label' => 'Plats Populaires (Consommations)',
-                    'data' => [],
+                    'label' => 'Activités Populaires',
+                    'data' => $data,
                     'borderColor' => '#FF6B6B',
-                    'backgroundColor' => 'rgba(255, 107, 107, 0.1)',
+                    'backgroundColor' => 'rgba(255, 107, 107, 0.12)',
                     'tension' => 0.3,
                     'fill' => true
                 ]
             ]
-        ];
-
-        // Top 10 plats populaires
-        $dishes = ['Riz Gras', 'Brochette', 'Poulet Rôti', 'Salade Fraîche', 'Viande Grillée', 'Poisson Fumet', 'Légumes Vapeur', 'Pâtes Complètes', 'Oeufs Brouillés', 'Salade Composée'];
-        
-        foreach ($dishes as $dish) {
-            $chartData['labels'][] = $dish;
-            $chartData['datasets'][0]['data'][] = rand(20, 150);
-        }
-
-        return $this->response->setJSON($chartData);
+        ]);
     }
 
-    /**
-     * API: Récupère les statistiques détaillées des régimes
-     */
     public function getDetailedStats()
     {
-        // Vérifier que l'utilisateur est connecté en tant qu'admin
         if (!session()->get('admin_logged_in')) {
             return $this->response->setStatusCode(401)->setJSON(['error' => 'Unauthorized']);
         }
 
-        // TODO: Remplacer par une vraie requête base de données
-        $stats = [
-            'regimes' => [
-                [
-                    'name' => 'Régime Équilibré',
-                    'users' => 215,
-                    'percentage' => 32.1,
-                    'rating' => 4.6,
-                    'status' => 'Populaire'
-                ],
-                [
-                    'name' => 'Régime Méditerranéen',
-                    'users' => 189,
-                    'percentage' => 28.2,
-                    'rating' => 4.8,
-                    'status' => 'Très Populaire'
-                ],
-                [
-                    'name' => 'Régime Keto',
-                    'users' => 142,
-                    'percentage' => 21.2,
-                    'rating' => 4.3,
-                    'status' => 'Populaire'
-                ],
-                [
-                    'name' => 'Régime Paleo',
-                    'users' => 98,
-                    'percentage' => 14.6,
-                    'rating' => 4.1,
-                    'status' => 'Modéré'
-                ],
-                [
-                    'name' => 'Régime Vegan',
-                    'users' => 76,
-                    'percentage' => 11.4,
-                    'rating' => 4.5,
-                    'status' => 'Modéré'
-                ]
-            ],
-            'popular_dishes' => [
-                ['name' => 'Riz Gras', 'count' => 287, 'regime' => 'Équilibré'],
-                ['name' => 'Brochette', 'count' => 245, 'regime' => 'Paleo'],
-                ['name' => 'Poulet Rôti', 'count' => 198, 'regime' => 'Équilibré'],
-                ['name' => 'Salade Fraîche', 'count' => 176, 'regime' => 'Vegan'],
-                ['name' => 'Viande Grillée', 'count' => 154, 'regime' => 'Keto']
-            ]
-        ];
+        $db = \\Config\\Database::connect();
+        $regimes = $db->table('regimes r')
+            ->select('r.nom AS name, COUNT(ar.id) AS users')
+            ->join('abonnements_regimes ar', 'ar.regime_id = r.id')
+            ->groupBy('r.id')
+            ->orderBy('users', 'DESC')
+            ->limit(5)
+            ->get()
+            ->getResultArray();
 
-        return $this->response->setJSON($stats);
+        $totalSubscriptions = (int) $db->table('abonnements_regimes')->countAllResults();
+
+        $formattedRegimes = array_map(function ($row) use ($totalSubscriptions) {
+            $percentage = $totalSubscriptions > 0 ? round(($row['users'] / $totalSubscriptions) * 100, 1) : 0;
+            return [
+                'name' => $row['name'],
+                'users' => (int) $row['users'],
+                'percentage' => $percentage,
+                'rating' => round(3.5 + ($percentage / 20), 1),
+                'status' => $percentage > 20 ? 'Très Populaire' : 'Populaire'
+            ];
+        }, $regimes);
+
+        $dishes = $db->table('regime_activite ra')
+            ->select('a.nom AS name, COUNT(ra.id) AS count')
+            ->join('activites_sportives a', 'a.id = ra.activite_id')
+            ->groupBy('a.id')
+            ->orderBy('count', 'DESC')
+            ->limit(5)
+            ->get()
+            ->getResultArray();
+
+        return $this->response->setJSON([
+            'regimes' => $formattedRegimes,
+            'popular_dishes' => array_map(fn($row) => [
+                'name' => $row['name'],
+                'count' => (int) $row['count'],
+                'regime' => 'N/A'
+            ], $dishes)
+        ]);
     }
 }

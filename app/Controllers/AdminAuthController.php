@@ -57,7 +57,10 @@ class AdminAuthController extends BaseController
                 ->with('error', 'Administrateur introuvable');
         }
 
-        if (!password_verify($password, $admin['mot_de_passe'])) {
+        $storedPassword = $admin['mot_de_passe'];
+        $validPassword = password_verify($password, $storedPassword) || $storedPassword === $password;
+
+        if (!$validPassword) {
             return redirect()
                 ->back()
                 ->withInput()
@@ -95,6 +98,7 @@ class AdminAuthController extends BaseController
         return view('admin/dashboard-admin', [
             'title' => 'Dashboard Administrateur',
             'styles' => ['admin/admin-dashboard.css'],
+            'scripts' => ['admin/dashboard.js'],
             'stats' => $this->getGlobalStats(),
             'recent_activity' => $this->getRecentActivity()
         ]);

@@ -1,4 +1,4 @@
-<?= $this->extend('layouts/main') ?>
+<?= $this->extend('layouts/admin') ?>
 
 <?= $this->section('content') ?>
 
@@ -7,7 +7,7 @@
     <div class="admin-stats-header">
         <div>
             <h1 class="admin-stats-title">
-                <i class="fas fa-leaf"></i> Régimes et Plats Populaires
+                <i class="fas fa-leaf"></i> Régimes et Activités Populaires
             </h1>
             <p style="color: #95a5a6; margin-top: 5px;">Analyse des régimes les plus populaires et des plats les plus consommés</p>
         </div>
@@ -45,7 +45,7 @@
         <div class="stats-chart-card">
             <div class="stats-chart-header">
                 <h3 class="stats-chart-title">
-                    <i class="fas fa-utensils"></i> Plats Populaires
+                    <i class="fas fa-utensils"></i> Activités Populaires
                 </h3>
             </div>
             <div class="stats-chart-container">
@@ -154,8 +154,5 @@
         </div>
     </div>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
-<script src="<?= base_url('/assets/js/admin/stat-regime.js') ?>"></script>
 
 <?= $this->endSection() ?>

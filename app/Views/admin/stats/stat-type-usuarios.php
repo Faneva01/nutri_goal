@@ -1,4 +1,4 @@
-<?= $this->extend('layouts/main') ?>
+<?= $this->extend('layouts/admin') ?>
 
 <?= $this->section('content') ?>
 
@@ -9,7 +9,7 @@
             <h1 class="admin-stats-title">
                 <i class="fas fa-users"></i> Types d'Utilisateurs
             </h1>
-            <p style="color: #95a5a6; margin-top: 5px;">Répartition entre Simple, Gold et Premium</p>
+            <p style="color: #95a5a6; margin-top: 5px;">Répartition entre Simple et Gold</p>
         </div>
         <div class="stats-controls">
             <button class="stats-filter active" onclick="loadChartTypeUtilisateurs()">
@@ -81,10 +81,10 @@
                     <td>
                         <i class="fas fa-gem" style="color: #e83e8c;"></i> Premium
                     </td>
-                    <td><strong>43</strong></td>
-                    <td>6.9%</td>
-                    <td>12,990 Ar/mois</td>
-                    <td><span class="stats-badge stats-badge-success">Tous Services</span></td>
+                    <td><strong>0</strong></td>
+                    <td>0%</td>
+                    <td>-</td>
+                    <td><span class="stats-badge stats-badge-info">Non défini</span></td>
                 </tr>
             </tbody>
         </table>
@@ -98,13 +98,10 @@
         <ul style="color: #555; line-height: 1.8;">
             <li>La majorité des utilisateurs (50.2%) sont en abonnement Simple</li>
             <li>30.1% des utilisateurs ont souscrit à Gold avec des plans personnalisés</li>
-            <li>Seulement 6.9% des utilisateurs bénéficient du plan Premium complet</li>
-            <li>Potentiel d'upsell: 80.3% des utilisateurs peuvent être convertis à des plans payants</li>
+            <li>La majorité des utilisateurs sont en abonnement Simple ou sans option Gold</li>
+            <li>Potentiel d'upsell: les utilisateurs Simple peuvent être convertis à Gold</li>
         </ul>
     </div>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
-<script src="<?= base_url('/assets/js/admin/stat-type-usuarios.js') ?>"></script>
 
 <?= $this->endSection() ?>

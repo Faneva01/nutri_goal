@@ -1,4 +1,4 @@
-<?= $this->extend('layouts/main') ?>
+<?= $this->extend('layouts/admin') ?>
 
 <?= $this->section('content') ?>
 
@@ -113,7 +113,7 @@
                 <canvas id="chartTypeUtilisateurs" data-url="<?= base_url('/admin/api/stats/type-usuarios') ?>"></canvas>
             </div>
             <div class="chart-footer">
-                <small class="text-muted">Simple vs Gold et Premium</small>
+                <small class="text-muted">Simple vs Gold</small>
             </div>
         </div>
 
@@ -178,9 +178,5 @@
         </div>
     </div>
 </div>
-
-<!-- Include Chart.js library -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
-<script src="<?= base_url('/assets/js/admin/dashboard.js') ?>"></script>
 
 <?= $this->endSection() ?>

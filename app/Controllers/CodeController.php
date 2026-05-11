@@ -3,161 +3,103 @@
 namespace App\Controllers;
 
 use App\Models\CodePortefeuilleModel;
-use CodeIgniter\HTTP\ResponseInterface;
+use App\Models\TransactionModel;
 
 class CodeController extends BaseController
 {
-    protected $codePortefeuilleModel;
+    protected CodePortefeuilleModel $codeModel;
+    protected TransactionModel $transactionModel;
 
     public function __construct()
     {
-        $this->codePortefeuilleModel = new CodePortefeuilleModel();
+        $this->codeModel = new CodePortefeuilleModel();
+        $this->transactionModel = new TransactionModel();
     }
 
     /**
-     * Affiche le formulaire d'achat de code portefeuille
+     * PAGE 1 : ACHAT (Saisie Montant)
      */
     public function achat()
     {
-        return view('pages/portefeuille/achat-code', [
-            'title' => 'Achat de Code Portefeuille',
-            'styles' => ['portefeuille/portefeuille.css'],
-            'scripts' => ['portefeuille/portefeuille.js']
+        return view('pages/portefeuille/achat_step1', [
+            'title'  => 'Acheter un code | Nutri Goal',
+            'styles' => ['portefeuille.css']
         ]);
     }
 
     /**
-     * Traite l'achat d'un code portefeuille
+     * TRAITEMENT ÉTAPE 1 -> REDIRECT VERS PAIEMENT
      */
     public function traiterAchat()
     {
         $montant = $this->request->getPost('montant');
-        $moyenPaiement = $this->request->getPost('moyen_paiement');
-
-        // Validation des données
-        if (!$this->validate([
-            'montant' => 'required|numeric|greater_than[0]',
-            'moyen_paiement' => 'required|in_list[mvola,airtel_money,orange_money,carte_bancaire]'
-        ])) {
-            return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        
+        if (!$montant || $montant < 1000) {
+            return redirect()->back()->with('error', 'Le montant minimum est de 1 000 Ar.');
         }
 
-        // Générer le code
-        $codeId = $this->codePortefeuilleModel->creerCode((float) $montant);
+        // Création du code (est_utilise = 0)
+        $codeId = $this->codeModel->creerCode((float)$montant);
 
-        if ($codeId) {
-            $codeData = $this->codePortefeuilleModel->find($codeId);
-
-            // Rediriger vers la page de paiement avec les détails
-            return redirect()->to('/paiement/process/' . $codeId)->with('success', 'Code généré avec succès');
+        if (!$codeId) {
+            return redirect()->back()->with('error', 'Erreur lors de la génération du code.');
         }
 
-        return redirect()->back()->with('error', 'Erreur lors de la génération du code');
+        return redirect()->to('/paiement/choisir/' . $codeId);
     }
 
     /**
-     * Affiche la page de validation du code
+     * PAGE : VALIDATION (J'ai un code)
      */
     public function validation()
     {
-        return view('pages/portefeuille/validation-code', [
-            'title' => 'Validation du Code Portefeuille',
-            'styles' => ['portefeuille/portefeuille.css'],
+        return view('pages/portefeuille/validation_page', [
+            'title'  => 'Valider un code | Nutri Goal',
+            'styles' => ['portefeuille.css'],
             'scripts' => ['portefeuille/portefeuille.js']
         ]);
     }
 
     /**
-     * Traite la validation d'un code
+     * TRAITEMENT VALIDATION (Crédit réel)
      */
     public function traiterValidation()
     {
-        $code = $this->request->getPost('code');
-        $utilisateurId = $this->getCurrentUserId();
+        $userId = session('user_id');
+        if (!$userId) return redirect()->to('/login');
 
-        if (!$utilisateurId) {
-            return redirect()->to('/login')->with('error', 'Vous devez être connecté');
+        $code = strtoupper(trim($this->request->getPost('code')));
+
+        if (empty($code)) {
+            return redirect()->back()->with('error', 'Veuillez saisir un code.');
         }
 
-        // Validation du code
-        if (!$this->codePortefeuilleModel->estValide($code)) {
-            return redirect()->back()->with('error', 'Code invalide ou déjà utilisé');
+        if (!$this->codeModel->estValide($code)) {
+            return redirect()->back()->with('error', 'Code invalide, déjà utilisé ou expiré.');
         }
 
-        // Utiliser le code
-        if ($this->codePortefeuilleModel->utiliserCode($code, $utilisateurId)) {
-            return redirect()->back()->with('success', 'Code validé avec succès ! Le montant a été ajouté à votre portefeuille.');
+        if ($this->codeModel->utiliserCode($code, $userId)) {
+            // Mettre à jour la session
+            $db = \Config\Database::connect();
+            $user = $db->table('utilisateurs')->select('solde')->where('id', $userId)->get()->getRowArray();
+            session()->set('solde', $user['solde']);
+
+            return redirect()->to('/dashboard')->with('success', 'Votre compte a été crédité avec succès !');
         }
 
-        return redirect()->back()->with('error', 'Erreur lors de la validation du code');
-    }
-
-    protected function getCurrentUserId()
-    {
-        $session = session();
-
-        if ($session->has('user_id')) {
-            return $session->get('user_id');
-        }
-
-        if ($session->has('id')) {
-            return $session->get('id');
-        }
-
-        $user = $session->get('user');
-        if (is_array($user) && isset($user['id'])) {
-            return $user['id'];
-        }
-
-        if (is_object($user) && isset($user->id)) {
-            return $user->id;
-        }
-
-        return null;
+        return redirect()->back()->with('error', 'Une erreur est survenue lors de la validation.');
     }
 
     /**
-     * API endpoint pour vérifier la validité d'un code (AJAX)
+     * AJAX POUR LE JS
      */
     public function verifierCode()
     {
-        $code = $this->request->getPost('code');
-
-        if (empty($code)) {
-            return $this->response->setJSON(['valid' => false, 'message' => 'Code requis']);
+        $code = strtoupper(trim($this->request->getPost('code')));
+        if ($this->codeModel->estValide($code)) {
+            $data = $this->codeModel->trouverParCode($code);
+            return $this->response->setJSON(['valid' => true, 'montant' => $data['montant']]);
         }
-
-        $estValide = $this->codePortefeuilleModel->estValide($code);
-
-        if ($estValide) {
-            $codeData = $this->codePortefeuilleModel->trouverParCode($code);
-            return $this->response->setJSON([
-                'valid' => true,
-                'montant' => $codeData['montant'],
-                'message' => 'Code valide'
-            ]);
-        }
-
-        return $this->response->setJSON(['valid' => false, 'message' => 'Code invalide ou déjà utilisé']);
-    }
-
-    /**
-     * Liste des codes utilisés par l'utilisateur (pour l'historique)
-     */
-    public function historique()
-    {
-        $utilisateurId = session()->get('user_id');
-
-        if (!$utilisateurId) {
-            return redirect()->to('/login');
-        }
-
-        $codes = $this->codePortefeuilleModel->getCodesUtilisateurs($utilisateurId);
-
-        return view('pages/historique_codes', [
-            'title' => 'Historique des Codes',
-            'codes' => $codes,
-            'styles' => ['style.css']
-        ]);
+        return $this->response->setJSON(['valid' => false, 'message' => 'Code invalide']);
     }
 }

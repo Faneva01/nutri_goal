@@ -8,6 +8,8 @@
     --admin-accent-soft: rgba(240, 112, 80, 0.15);
     --admin-surface: #ffffff;
     --admin-border: rgba(18, 26, 56, 0.1);
+    --sidebar-width: 260px;
+    --header-height: 60px;
 }
 
 .admin-shell {
@@ -17,7 +19,7 @@
 }
 
 .admin-sidebar {
-    width: 260px;
+    width: var(--sidebar-width);
     background: var(--admin-sidebar);
     color: var(--admin-sidebar-text);
     display: flex;
@@ -25,6 +27,11 @@
     justify-content: space-between;
     padding: 24px 18px;
     gap: 24px;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
 }
 
 .admin-sidebar-top {
@@ -138,57 +145,40 @@
     background: rgba(255,255,255,.16);
 }
 
-.admin-page {
+.admin-main-wrapper {
+    background: var(--admin-bg);
+    margin-left: var(--sidebar-width);
     flex: 1;
-    display: flex;
-    flex-direction: column;
+    min-height: 100vh;
 }
 
-.admin-navbar {
+.admin-header-minimal {
     background: #ffffff;
     border-bottom: 1px solid rgba(18, 26, 56, 0.08);
     padding: 0 32px;
-    height: 60px;
+    height: var(--header-height);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem;
 }
 
-.admin-content {
+.admin-page-content {
     padding: 24px 32px;
-    min-height: calc(100vh - 60px);
-}
-
-.admin-navbar .logo {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    font-weight: 800;
-    color: var(--admin-accent);
-}
-
-.admin-navbar .logo-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 12px;
-    display: grid;
-    place-items: center;
-    background: rgba(240, 112, 80, 0.15);
-    color: var(--admin-accent);
 }
 
 @media (max-width: 1200px) {
-    .admin-shell {
-        flex-direction: column;
-    }
-
     .admin-sidebar {
         width: 100%;
+        position: relative;
+        height: auto;
         flex-direction: row;
         align-items: center;
         justify-content: space-between;
         padding: 16px;
+    }
+
+    .admin-main-wrapper {
+        margin-left: 0;
     }
 
     .admin-sidebar-nav {
@@ -200,13 +190,5 @@
 
     .admin-sidebar-link {
         flex: 1 1 48%;
-    }
-
-    .admin-navbar {
-        padding: 0 20px;
-    }
-
-    .admin-content {
-        padding: 20px;
     }
 }

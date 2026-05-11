@@ -2,21 +2,18 @@
 
 <?= $this->section('content') ?>
 
-<div class="admin-dashboard-container">
+<div class="admin-dashboard-container" style="padding:0;">
     <!-- Header -->
     <div class="admin-dashboard-header">
         <div class="admin-header-content">
             <h1 class="admin-dashboard-title">
                 <i class="fas fa-tachometer-alt"></i> Tableau de Bord Administrateur
             </h1>
-            <p class="admin-dashboard-subtitle">Bienvenue <?= htmlspecialchars(session()->get('admin_name') ?? 'Administrateur') ?></p>
+            <p class="admin-dashboard-subtitle">Aperçu global de votre plateforme Nutri Goal</p>
         </div>
         <div class="admin-header-actions">
-            <a href="<?= base_url('/admin/stats/usuarios') ?>" class="btn btn-sm btn-outline-primary">
-                <i class="fas fa-refresh"></i> Rafraîchir
-            </a>
-            <a href="<?= base_url('/admin/auth/logout') ?>" class="btn btn-sm btn-outline-danger">
-                <i class="fas fa-sign-out-alt"></i> Déconnexion
+            <a href="<?= base_url('/admin/dashboard') ?>" class="btn btn-sm btn-outline-primary">
+                <i class="fas fa-sync"></i> Rafraîchir les données
             </a>
         </div>
     </div>
@@ -48,11 +45,11 @@
                 <i class="fas fa-money-bill-wave"></i>
             </div>
             <div class="stat-content">
-                <h3 class="stat-value"><?= number_format($stats['total_revenue'] ?? 0, 2) ?> Ar</h3>
+                <h3 class="stat-value"><?= format_currency_smart($stats['total_revenue'] ?? 0) ?></h3>
                 <p class="stat-label">Chiffre d'Affaire</p>
             </div>
             <div class="stat-trend up">
-                <i class="fas fa-arrow-up"></i> +<?= $stats['revenue_today'] ?? 0 ?> Ar
+                <i class="fas fa-arrow-up"></i> +<?= format_currency_smart($stats['revenue_today'] ?? 0) ?>
             </div>
         </div>
 
@@ -151,21 +148,27 @@
     </div>
 
     <!-- Recent Activity -->
-    <div class="admin-recent-activity">
-        <div class="activity-header">
+    <div class="admin-recent-activity dash-panel">
+        <div class="panel-header">
             <h4 class="activity-title">
                 <i class="fas fa-history"></i> Activité Récente
             </h4>
         </div>
         <div class="activity-list">
             <?php if (!empty($recent_activity)): ?>
-                <?php foreach ($recent_activity as $activity): ?>
+                <?php foreach ($recent_activity as $activity): 
+                    // Formater les montants dans le message s'ils existent
+                    $message = $activity['message'];
+                    $message = preg_replace_callback('/(\d+)\s*Ar/', function($m) {
+                        return format_currency_smart($m[1]);
+                    }, $message);
+                ?>
                     <div class="activity-item">
                         <div class="activity-icon" style="background-color: <?= $activity['color'] ?>;">
                             <i class="<?= $activity['icon'] ?>"></i>
                         </div>
                         <div class="activity-content">
-                            <p class="activity-message"><?= htmlspecialchars($activity['message']) ?></p>
+                            <p class="activity-message"><?= htmlspecialchars($message) ?></p>
                             <small class="activity-time"><?= $activity['time'] ?></small>
                         </div>
                     </div>
@@ -179,4 +182,8 @@
     </div>
 </div>
 
+<?= $this->endSection() ?>
+
+<?= $this->section('scripts') ?>
+<script src="<?= js_url('admin/dashboard.js') ?>"></script>
 <?= $this->endSection() ?>

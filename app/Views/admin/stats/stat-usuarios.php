@@ -9,117 +9,87 @@
             <h1 class="admin-stats-title">
                 <i class="fas fa-chart-line"></i> Statistiques Utilisateurs
             </h1>
-            <p style="color: #95a5a6; margin-top: 5px;">Évolution du nombre d'utilisateurs sur les 30 derniers jours</p>
+            <p style="color: #9a938e; margin-top: 5px;">Analyse de la croissance et de l'engagement des utilisateurs</p>
         </div>
         <div class="stats-controls">
-            <button class="stats-filter active" onclick="loadChartUtilisateurs()">
+            <button class="stats-filter active" onclick="window.location.reload()">
                 <i class="fas fa-sync"></i> Rafraîchir
             </button>
-            <button class="stats-filter" onclick="exportToCSV()">
-                <i class="fas fa-download"></i> Export CSV
-            </button>
             <a href="<?= base_url('/admin/dashboard') ?>" class="stats-filter">
-                <i class="fas fa-arrow-left"></i> Tableau de Bord
+                <i class="fas fa-arrow-left"></i> Retour
             </a>
         </div>
     </div>
 
-    {{-- Main Chart --}}
-    <div class="admin-stats-grid">
-        <div class="stats-chart-card">
-            <div class="stats-chart-header">
-                <h3 class="stats-chart-title">
-                    <i class="fas fa-line-chart"></i> Évolution Utilisateurs
-                </h3>
-            </div>
-            <div class="stats-chart-container">
-                <canvas 
-                    id="chartUtilisateurs" 
-                    data-url="<?= base_url('/admin/api/stats/usuarios') ?>">
-                </canvas>
-            </div>
+    <!-- Main Chart -->
+    <div class="stats-chart-card">
+        <div class="chart-header">
+            <h3 class="chart-title">
+                <i class="fas fa-line-chart"></i> Évolution Utilisateurs (30j)
+            </h3>
+        </div>
+        <div class="chart-container" style="height: 350px;">
+            <canvas id="chartUtilisateurs" data-url="<?= base_url('/admin/api/stats/usuarios') ?>"></canvas>
         </div>
     </div>
 
-    {{-- Summary Stats --}}
-    <div class="stats-summary" style="margin-bottom: 20px;">
+    <!-- Summary Stats -->
+    <div class="stats-summary">
         <div class="summary-item">
-            <div class="summary-label">Utilisateurs Actifs Aujourd'hui</div>
-            <div class="summary-value">+125</div>
-            <div class="summary-trend">
-                <i class="fas fa-arrow-up"></i> Tendance Positive
-            </div>
+            <div class="summary-label">Total Utilisateurs</div>
+            <div class="summary-value"><?= number_format($summary['total']) ?></div>
+            <div class="summary-trend">Inscriptions cumulées</div>
         </div>
 
         <div class="summary-item">
-            <div class="summary-label">Total 30 Jours</div>
-            <div class="summary-value">+2,450</div>
-            <div class="summary-trend">
-                <i class="fas fa-arrow-up"></i> +28% vs période précédente
-            </div>
+            <div class="summary-label">Membres Gold</div>
+            <div class="summary-value"><?= number_format($summary['gold']) ?></div>
+            <div class="summary-trend">Utilisateurs premium</div>
         </div>
 
         <div class="summary-item">
             <div class="summary-label">Taux d'Activation</div>
-            <div class="summary-value">87%</div>
-            <div class="summary-trend">
-                Utilisateurs ayant complété le profil
-            </div>
-        </div>
-
-        <div class="summary-item">
-            <div class="summary-label">Taux de Rétention</div>
-            <div class="summary-value">75%</div>
-            <div class="summary-trend">
-                Utilisateurs revenant chaque semaine
-            </div>
+            <div class="summary-value"><?= $summary['activation'] ?>%</div>
+            <div class="summary-trend">Conversion vers Gold</div>
         </div>
     </div>
 
-    {{-- Detailed Table --}}
+    <!-- Detailed Table -->
     <div class="stats-table-card">
+        <div class="panel-header">
+            <h2>Historique des 10 derniers jours</h2>
+        </div>
         <table class="stats-table">
             <thead>
                 <tr>
                     <th>Date</th>
                     <th>Nouveaux Utilisateurs</th>
-                    <th>Utilisateurs Actifs</th>
-                    <th>Variation</th>
+                    <th>Abonnements Actifs</th>
+                    <th>Variation Active</th>
                     <th>Statut</th>
                 </tr>
             </thead>
             <tbody>
+                <?php foreach($tableData as $row): ?>
                 <tr>
-                    <td>09 Mai 2026</td>
-                    <td><strong>12</strong></td>
-                    <td>347</td>
-                    <td>+5 (+2%)</td>
-                    <td><span class="stats-badge stats-badge-success">Croissance</span></td>
+                    <td><?= $row['date'] ?></td>
+                    <td><strong><?= $row['new'] ?></strong></td>
+                    <td><?= $row['active'] ?></td>
+                    <td><?= $row['diff'] ?></td>
+                    <td>
+                        <span class="stats-badge stats-badge-<?= $row['status'] == 'Croissance' ? 'success' : 'danger' ?>">
+                            <?= $row['status'] ?>
+                        </span>
+                    </td>
                 </tr>
-                <tr>
-                    <td>08 Mai 2026</td>
-                    <td><strong>19</strong></td>
-                    <td>342</td>
-                    <td>+8 (+2%)</td>
-                    <td><span class="stats-badge stats-badge-success">Croissance</span></td>
-                </tr>
-                <tr>
-                    <td>07 Mai 2026</td>
-                    <td><strong>15</strong></td>
-                    <td>334</td>
-                    <td>+3 (+1%)</td>
-                    <td><span class="stats-badge stats-badge-warning">Stable</span></td>
-                </tr>
-                <tr>
-                    <td>06 Mai 2026</td>
-                    <td><strong>8</strong></td>
-                    <td>331</td>
-                    <td>-5 (-2%)</td>
-                    <td><span class="stats-badge stats-badge-danger">Baisse</span></td>
-                </tr>
+                <?php endforeach; ?>
             </tbody>
         </table>
     </div>
 </div>
 
+<?= $this->endSection() ?>
+
+<?= $this->section('scripts') ?>
+<script src="<?= js_url('admin/stat-usuarios.js') ?>"></script>
 <?= $this->endSection() ?>

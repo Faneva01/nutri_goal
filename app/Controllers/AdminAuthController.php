@@ -24,7 +24,8 @@ class AdminAuthController extends BaseController
 
         return view('admin/admin-login', [
             'title' => 'Connexion Administrateur',
-            'styles' => ['admin/admin-login.css']
+            'styles' => ['admin/admin-login.css'],
+            'show_navbar' => false
         ]);
     }
 
@@ -184,31 +185,50 @@ class AdminAuthController extends BaseController
      */
     private function getRecentActivity(): array
     {
-        return [
-            [
-                'icon' => 'fas fa-user-plus',
-                'message' => 'Nouvel utilisateur inscrit : un compte a été créé',
-                'time' => 'Il y a 5 minutes',
-                'color' => '#28a745'
-            ],
-            [
-                'icon' => 'fas fa-credit-card',
-                'message' => 'Achat de code portefeuille effectué',
-                'time' => 'Il y a 15 minutes',
-                'color' => '#007bff'
-            ],
-            [
-                'icon' => 'fas fa-check-circle',
-                'message' => 'Code validé et crédité au compte',
-                'time' => 'Il y a 20 minutes',
-                'color' => '#17a2b8'
-            ],
-            [
-                'icon' => 'fas fa-leaf',
-                'message' => 'Nouveau régime créé',
-                'time' => 'Il y a 1 heure',
-                'color' => '#ffc107'
-            ]
-        ];
+        $db = \Config\Database::connect();
+        $rows = $db->table('historique_transactions t')
+            ->select('t.*, u.nom_complet as user_name')
+            ->join('utilisateurs u', 'u.id = t.utilisateur_id', 'left')
+            ->orderBy('date_transaction', 'DESC')
+            ->limit(8)
+            ->get()
+            ->getResultArray();
+
+        $activities = [];
+        foreach ($rows as $row) {
+            $type = $row['type_transaction'];
+            $icon = 'fas fa-exchange-alt';
+            $color = '#6c757d';
+            $message = $row['description'] ?? 'Transaction';
+
+            switch ($type) {
+                case 'ajout_code':
+                    $icon = 'fas fa-plus-circle';
+                    $color = '#28a745';
+                    break;
+                case 'achat_regime':
+                    $icon = 'fas fa-utensils';
+                    $color = '#007bff';
+                    break;
+                case 'achat_gold':
+                    $icon = 'fas fa-crown';
+                    $color = '#ffc107';
+                    break;
+                case 'remboursement':
+                    $icon = 'fas fa-undo';
+                    $color = '#dc3545';
+                    break;
+            }
+
+            $userName = $row['user_name'] ?? 'Inconnu';
+            $activities[] = [
+                'icon' => $icon,
+                'message' => "[$userName] $message",
+                'time' => date('d/m H:i', strtotime($row['date_transaction'])),
+                'color' => $color
+            ];
+        }
+
+        return $activities;
     }
 }

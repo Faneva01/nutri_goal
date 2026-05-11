@@ -3,14 +3,26 @@
 namespace App\Controllers;
 
 use App\Models\ProfilModel;
+use App\Models\ObjectifModel;
+use App\Models\AbonnementGoldModel;
+use App\Models\TransactionModel;
+use App\Models\CodePortefeuilleModel;
 
 class ProfilController extends BaseController
 {
     protected ProfilModel $profilModel;
+    protected ObjectifModel $objectifModel;
+    protected AbonnementGoldModel $goldModel;
+    protected TransactionModel $transactionModel;
+    protected CodePortefeuilleModel $codeModel;
 
     public function __construct()
     {
         $this->profilModel = new ProfilModel();
+        $this->objectifModel = new ObjectifModel();
+        $this->goldModel = new AbonnementGoldModel();
+        $this->transactionModel = new TransactionModel();
+        $this->codeModel = new CodePortefeuilleModel();
     }
 
     public function index()
@@ -22,16 +34,50 @@ class ProfilController extends BaseController
             return redirect()->to('/login');
         }
 
+        // Récupérer l'objectif de l'utilisateur
+        $objectif = $userId ? $this->objectifModel->getLatestByUser($userId) : null;
+
+        // Récupérer les activités réelles
+        $historiqueActivites = [];
+        if ($userId) {
+            $db = \Config\Database::connect();
+            $historiqueActivites = $db->table('suivi_activites')
+                ->where('utilisateur_id', $userId)
+                ->orderBy('date_activite', 'DESC')
+                ->get(5)->getResultArray();
+            
+            // Formatage pour la vue si nécessaire
+            $historiqueActivites = array_map(function($a) {
+                return [
+                    'date'  => $a['date_activite'],
+                    'label' => $a['nom_activite'],
+                    'valeur' => $a['valeur']
+                ];
+            }, $historiqueActivites);
+        }
+
+        // Récupérer le prochain rappel
+        $prochainRappel = 'Aucun rappel prévu';
+        if ($userId) {
+            $db = \Config\Database::connect();
+            $rappel = $db->table('rappels')
+                ->where('utilisateur_id', $userId)
+                ->where('date_rappel >=', date('Y-m-d H:i:s'))
+                ->orderBy('date_rappel', 'ASC')
+                ->get(1)->getRowArray();
+            
+            if ($rappel) {
+                $prochainRappel = $rappel['message'];
+            }
+        }
+
         return view('pages/profil/profil_page', [
             'title'               => 'Mon profil',
             'user'                => $user,
+            'objectif'            => $objectif,
             'navView'             => 'inc/nav',
-            'prochainRappel'      => 'Lundi 08:30 - Hydratation et petit-déjeuner',
-            'historiqueActivites' => [
-                ['date' => '2026-05-08', 'label' => 'Marche rapide',       'valeur' => '35 min'],
-                ['date' => '2026-05-07', 'label' => 'Objectif eau',        'valeur' => '2.0 L'],
-                ['date' => '2026-05-06', 'label' => 'Poids enregistré',    'valeur' => ($user['poids'] ?? 70) . ' kg'],
-            ],
+            'prochainRappel'      => $prochainRappel,
+            'historiqueActivites' => $historiqueActivites,
             'styles'  => ['profil-page.css'],
             'scripts' => ['profil-page.js'],
         ]);
@@ -92,22 +138,59 @@ class ProfilController extends BaseController
     public function toggleGold()
     {
         $userId = session()->get('user_id');
+        $prixGold = 50000; // Prix fixe pour l'option Gold
 
         if ($userId === null) {
             return $this->response->setJSON(['success' => false, 'message' => 'Non connecté.']);
         }
 
-        $optionGold = (int) $this->request->getPost('option_gold');
+        $user = $this->profilModel->find($userId);
+        
+        // Si déjà Gold, on ne fait rien (ou on pourrait gérer un désabonnement, mais le sujet dit "payer en une fois")
+        if ($user['option_gold']) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Vous êtes déjà membre Gold.']);
+        }
 
-        // skipValidation car on ne touche qu'à option_gold, pas aux champs requis.
-        if (!$this->profilModel->skipValidation(true)->update($userId, ['option_gold' => $optionGold])) {
+        if ($user['solde'] < $prixGold) {
             return $this->response->setJSON([
-                'success' => false,
-                'message' => "Erreur lors de la mise à jour de l'option Gold.",
+                'success' => false, 
+                'message' => 'Solde insuffisant pour passer en mode Gold (Requis: ' . number_format($prixGold, 0) . ' Ar).'
             ]);
         }
 
-        return $this->response->setJSON(['success' => true]);
+        // Transaction
+        $this->profilModel->db->transStart();
+
+        // 1. Déduire le solde
+        $this->profilModel->update($userId, ['solde' => $user['solde'] - $prixGold]);
+
+        // 2. Activer Gold
+        $this->goldModel->activateGold($userId, $prixGold);
+
+        // 3. Créer historique transaction
+        $this->transactionModel->insert([
+            'utilisateur_id' => $userId,
+            'type_transaction' => 'achat_gold',
+            'montant' => $prixGold,
+            'ancien_solde' => $user['solde'],
+            'nouveau_solde' => $user['solde'] - $prixGold,
+            'description' => "Achat Option Gold — 15% de remise à vie",
+            'date_transaction' => date('Y-m-d H:i:s')
+        ]);
+
+        $this->profilModel->db->transComplete();
+
+        if ($this->profilModel->db->transStatus() === false) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Une erreur est survenue lors de l\'achat.']);
+        }
+
+        session()->set('solde', $user['solde'] - $prixGold);
+
+        return $this->response->setJSON([
+            'success' => true, 
+            'message' => 'Félicitations ! Vous êtes maintenant membre Gold.',
+            'nouveau_solde' => number_format($user['solde'] - $prixGold, 0) . ' Ar'
+        ]);
     }
 
     public function rechargerSolde()
@@ -120,27 +203,10 @@ class ProfilController extends BaseController
 
         $code = strtoupper(trim($this->request->getPost('code')));
 
-        // Codes valides — à terme, mettre en base via la table codes_solde.
-        $codesValides = [
-            'PROMO10'   => 10.00,
-            'PROMO20'   => 20.00,
-            'BIENVENUE' =>  5.00,
-        ];
-
-        if (!array_key_exists($code, $codesValides)) {
+        if (!$this->codeModel->utiliserCode($code, $userId)) {
             return $this->response->setJSON([
                 'success' => false,
-                'message' => 'Code invalide ou expiré.',
-            ]);
-        }
-
-        $montant   = $codesValides[$code];
-        $recharged = $this->profilModel->rechargerSolde($userId, $montant);
-
-        if (!$recharged) {
-            return $this->response->setJSON([
-                'success' => false,
-                'message' => 'Erreur lors de la recharge.',
+                'message' => 'Code invalide, déjà utilisé ou expiré.',
             ]);
         }
 
@@ -151,8 +217,8 @@ class ProfilController extends BaseController
 
         return $this->response->setJSON([
             'success'       => true,
-            'message'       => '+' . number_format($montant, 2) . ' € ajoutés à votre solde.',
-            'nouveau_solde' => number_format((float) $user['solde'], 2),
+            'message'       => 'Votre compte a été crédité avec succès.',
+            'nouveau_solde' => number_format((float) $user['solde'], 0) . ' Ar',
         ]);
     }
 }

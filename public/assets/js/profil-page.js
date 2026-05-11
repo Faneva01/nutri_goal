@@ -130,19 +130,59 @@ async function saveChanges() {
   }
 }
 
-// ── Gold Toggle (appel AJAX → ProfilController::toggleGold) ──
-async function toggleGold() {
-  const active = document.getElementById('gold-toggle').checked;
-  document.getElementById('gold-status-text').textContent = active ? 'Activé' : 'Non activé';
+// ── Gold Toggle (Custom Modal) ──
+function toggleGold() {
+  const checkbox = document.getElementById('gold-toggle');
+  const active = checkbox.checked;
+
+  if (active) {
+    // On décoche d'abord pour laisser l'utilisateur confirmer via le modal
+    checkbox.checked = false;
+    openGoldModal();
+  } else {
+    // Si l'utilisateur essaie de désactiver, on l'en empêche
+    checkbox.checked = true;
+    showToast('info', 'L\'option Gold est active à vie.');
+  }
+}
+
+function openGoldModal() {
+  document.getElementById('goldModal').classList.add('show');
+}
+
+function closeGoldModal() {
+  document.getElementById('goldModal').classList.remove('show');
+}
+
+async function confirmGoldActivation() {
+  const btn = document.getElementById('confirmGoldBtn');
+  const checkbox = document.getElementById('gold-toggle');
+  const statusText = document.getElementById('gold-status-text');
+  
+  btn.disabled = true;
+  btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Activation…`;
 
   try {
-    const body = new URLSearchParams({ option_gold: active ? 1 : 0 });
+    const body = new URLSearchParams({ option_gold: 1 });
     const res  = await fetch('/profil/toggleGold', { method: 'POST', body });
     const data = await res.json();
-    if (!data.success) showToast('error', 'Erreur lors de la mise à jour Gold.');
-    else showToast(active ? 'gold' : 'info', active ? 'Option Gold activée !' : 'Option Gold désactivée.');
+    
+    if (data.success) {
+      checkbox.checked = true;
+      statusText.textContent = 'Activé';
+      if (data.nouveau_solde) {
+          document.getElementById('balance').textContent = data.nouveau_solde;
+      }
+      showToast('gold', data.message || 'Option Gold activée !');
+      closeGoldModal();
+    } else {
+      showToast('error', data.message || 'Erreur lors de l\'activation Gold.');
+    }
   } catch {
     showToast('error', 'Erreur réseau.');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `Confirmer le paiement <i class="fas fa-check"></i>`;
   }
 }
 
@@ -165,7 +205,7 @@ async function validateCode() {
 
     if (data.success) {
       const balanceEl     = document.getElementById('balance');
-      balanceEl.textContent = data.nouveau_solde + ' €';
+      balanceEl.textContent = data.nouveau_solde;
       balanceEl.style.transform = 'scale(1.15)';
       setTimeout(() => balanceEl.style.transform = 'scale(1)', 300);
 
@@ -188,28 +228,53 @@ async function validateCode() {
   }, 4000);
 }
 
-// ── Toast ─────────────────────────────────────────────────────
-const TOAST_ICONS = {
-  success: '<i class="fas fa-check-circle"></i>',
-  error:   '<i class="fas fa-times-circle"></i>',
-  warning: '<i class="fas fa-exclamation-triangle"></i>',
-  info:    '<i class="fas fa-info-circle"></i>',
-  gold:    '<i class="fas fa-crown"></i>',
-};
+// ── Objectif (appel AJAX → ObjectifController::store) ────────
+async function updateObjectif() {
+  const type_objectif = document.getElementById('new_type_objectif').value;
+  const poids_cible = document.getElementById('new_poids_cible').value;
 
-function showToast(type, message) {
-  const toast = document.getElementById('toast');
-  const icon  = TOAST_ICONS[type] || TOAST_ICONS.info;
-  toast.innerHTML = `${icon} <span>${message}</span>`;
-  toast.className = `toast toast--${type} show`;
-  clearTimeout(toast._timer);
-  toast._timer = setTimeout(() => toast.classList.remove('show'), 3000);
+  if (!poids_cible || poids_cible <= 0) {
+    showToast('warning', 'Veuillez entrer un poids cible valide.');
+    return;
+  }
+
+  const btn = document.querySelector('.objectif-card + div .save-btn');
+  const originalHtml = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Mise à jour…`;
+
+  try {
+    const body = new URLSearchParams({
+      type_objectif,
+      poids_cible,
+      utilisateur_id: window.userId || '' // On peut aussi le récupérer côté serveur via session
+    });
+
+    const res = await fetch('/objectif', { method: 'POST', body });
+    const data = await res.json();
+
+    if (data.success) {
+      document.getElementById('current-obj-type').textContent = type_objectif.charAt(0).toUpperCase() + type_objectif.slice(1).replace('_', ' ');
+      document.getElementById('current-obj-poids').textContent = parseFloat(poids_cible).toFixed(1) + ' kg';
+      showToast('success', data.message);
+    } else {
+      showToast('error', data.message || 'Erreur lors de la mise à jour.');
+    }
+  } catch (err) {
+    showToast('error', 'Erreur réseau.');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalHtml;
+  }
 }
 
 // ── Init ─────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   updateIMC();
-  document.getElementById('promo-code').addEventListener('keydown', e => {
-    if (e.key === 'Enter') validateCode();
-  });
+  const promoCodeInput = document.getElementById('promo-code');
+  if (promoCodeInput) {
+    promoCodeInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') validateCode();
+    });
+  }
 });

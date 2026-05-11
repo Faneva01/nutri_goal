@@ -1,272 +1,188 @@
 /**
- * Script pour gestion du portefeuille
+ * portefeuille.js — NutriGoal
+ *
+ * FIX: suppression de <?= site_url(...) ?> dans un fichier .js statique
+ *      (le PHP n'est pas interprété dans les fichiers .js servis directement).
+ *      On utilise désormais une URL relative ou window.baseUrl définie inline
+ *      dans le template PHP qui inclut ce script.
+ *
+ * Convention : dans votre layout PHP, ajoutez AVANT ce script :
+ *   <script>window.baseUrl = "<?= rtrim(base_url(), '/') ?>";</script>
+ *   <script>window.csrfToken = "<?= csrf_hash() ?>";</script>
+ *   <script>window.csrfHeader = "<?= csrf_header() ?>";</script>
  */
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Vérification de code en temps réel
-    const codeInput = document.getElementById('code');
-    const verifyBtn = document.getElementById('verify-code-btn');
-    const codeStatusDiv = document.getElementById('code-status');
+document.addEventListener('DOMContentLoaded', function () {
 
-    if (codeInput) {
+    // ── Vérification de code en temps réel (AJAX) ───────────────────────────
+    const codeInput    = document.getElementById('code');
+    const codeStatusEl = document.getElementById('code-status');
+
+    if (codeInput && codeStatusEl) {
         codeInput.addEventListener('input', debounce(verifyCodeLive, 500));
     }
 
-    // Copier un code dans le presse-papiers
-    const copyButtons = document.querySelectorAll('.btn-copy-code');
-    copyButtons.forEach(btn => {
-        btn.addEventListener('click', copyToClipboard);
+    // ── Copier un code dans le presse-papiers ───────────────────────────────
+    document.querySelectorAll('.btn-copy-code').forEach(btn => {
+        btn.addEventListener('click', handleCopy);
     });
 
-    // Fermer les alerts
-    const closeButtons = document.querySelectorAll('.alert-close');
-    closeButtons.forEach(btn => {
-        btn.addEventListener('click', function() {
-            this.parentElement.remove();
+    // ── Fermer les alertes ──────────────────────────────────────────────────
+    document.querySelectorAll('.alert-close').forEach(btn => {
+        btn.addEventListener('click', function () {
+            this.closest('.alert').remove();
         });
     });
 
-    // Sélection du moyen de paiement
-    const paymentMethods = document.querySelectorAll('input[name="moyen_paiement"]');
-    paymentMethods.forEach(method => {
-        method.addEventListener('change', updatePaymentForm);
-    });
-
-    // Validation du formulaire d'achat
+    // ── Validation formulaire achat ─────────────────────────────────────────
     const buyForm = document.getElementById('buy-form');
-    if (buyForm) {
-        buyForm.addEventListener('submit', validateBuyForm);
-    }
+    if (buyForm) buyForm.addEventListener('submit', validateBuyForm);
 
-    // Validation du formulaire de validation
+    // ── Validation formulaire validation de code ────────────────────────────
     const validateForm = document.getElementById('validate-form');
-    if (validateForm) {
-        validateForm.addEventListener('submit', validateValidateForm);
-    }
+    if (validateForm) validateForm.addEventListener('submit', validateCodeForm);
 
-    // Format du montant en temps réel
+    // ── Format numérique du montant ─────────────────────────────────────────
     const montantInput = document.getElementById('montant');
-    if (montantInput) {
-        montantInput.addEventListener('input', formatMontant);
-    }
+    if (montantInput) montantInput.addEventListener('input', sanitizeMontant);
+
+    // ── Format carte bancaire ───────────────────────────────────────────────
+    const carteInput = document.getElementById('numero_carte');
+    if (carteInput) carteInput.addEventListener('input', formatCardNumber);
+
+    const expInput = document.getElementById('date_expiration');
+    if (expInput) expInput.addEventListener('input', formatExpiry);
 });
 
-/**
- * Débounce function for delayed execution
- */
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
+// ── DEBOUNCE ─────────────────────────────────────────────────────────────────
+
+function debounce(fn, ms) {
+    let timer;
+    return function (...args) {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn.apply(this, args), ms);
     };
 }
 
-/**
- * Vérification de code en temps réel
- */
-function verifyCodeLive() {
-    const code = document.getElementById('code').value.trim();
+// ── VÉRIFICATION CODE (AJAX) ──────────────────────────────────────────────────
 
-    if (!code || code.length < 5) {
-        clearCodeStatus();
-        return;
+function verifyCodeLive() {
+    const code       = document.getElementById('code').value.trim();
+    const statusDiv  = document.getElementById('code-status');
+    const codeInput  = document.getElementById('code');
+
+    codeInput.classList.remove('is-valid', 'is-invalid');
+    statusDiv.innerHTML = '';
+
+    if (!code || code.length < 8) return;
+
+    // FIX: on utilise window.baseUrl injecté par le template PHP
+    const url = (window.baseUrl || '') + '/code/verifier';
+
+    const body = new URLSearchParams({ code });
+
+    // Ajouter le token CSRF si disponible
+    if (window.csrfToken && window.csrfHeader) {
+        body.append(window.csrfHeader, window.csrfToken);
     }
 
-    fetch('<?= site_url('/code/verifier') ?>', {
+    fetch(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
-            'X-Requested-With': 'XMLHttpRequest'
+            'X-Requested-With': 'XMLHttpRequest',
         },
-        body: 'code=' + encodeURIComponent(code)
+        body: body.toString(),
     })
-    .then(response => response.json())
-    .then(data => {
-        const statusDiv = document.getElementById('code-status');
-        if (statusDiv) {
+        .then(res => res.json())
+        .then(data => {
             if (data.valid) {
                 statusDiv.innerHTML = `
                     <div class="alert alert-success">
-                        ✓ Code valide - Montant: <strong>${data.montant} Ar</strong>
-                    </div>
-                `;
-                document.getElementById('code').classList.add('is-valid');
+                        <span><i class="fas fa-check-circle"></i>
+                        Code valide — Montant : <strong>${formatNumber(data.montant)} Ar</strong></span>
+                    </div>`;
+                codeInput.classList.add('is-valid');
             } else {
                 statusDiv.innerHTML = `
                     <div class="alert alert-danger">
-                        ✗ ${data.message}
-                    </div>
-                `;
-                document.getElementById('code').classList.add('is-invalid');
+                        <span><i class="fas fa-times-circle"></i> ${data.message}</span>
+                    </div>`;
+                codeInput.classList.add('is-invalid');
             }
-        }
-    })
-    .catch(error => {
-        console.error('Erreur:', error);
-    });
+        })
+        .catch(() => {
+            showToast('error', 'Erreur de connexion au serveur.');
+        });
 }
 
-/**
- * Effacer l'état du code
- */
-function clearCodeStatus() {
-    const statusDiv = document.getElementById('code-status');
-    if (statusDiv) {
-        statusDiv.innerHTML = '';
-    }
-    const codeInput = document.getElementById('code');
-    if (codeInput) {
-        codeInput.classList.remove('is-valid', 'is-invalid');
-    }
-}
+// ── COPY TO CLIPBOARD ─────────────────────────────────────────────────────────
 
-/**
- * Copier un code dans le presse-papiers
- */
-function copyToClipboard(e) {
+function handleCopy(e) {
     e.preventDefault();
-    const codeText = this.dataset.code || this.closest('.code-display').textContent.trim();
+    const text = this.dataset.code || this.closest('[data-code]')?.dataset.code || '';
+    if (!text) return;
 
-    navigator.clipboard.writeText(codeText).then(() => {
-        const originalText = this.textContent;
-        this.textContent = 'Copié!';
-        setTimeout(() => {
-            this.textContent = originalText;
-        }, 2000);
-    }).catch(err => {
-        alert('Erreur lors de la copie');
-        console.error(err);
+    navigator.clipboard.writeText(text).then(() => {
+        const original = this.innerHTML;
+        this.innerHTML = '<i class="fas fa-check"></i> Copié !';
+        setTimeout(() => { this.innerHTML = original; }, 2000);
+    }).catch(() => {
+        showToast('warning', 'Copie automatique non disponible — sélectionnez le code manuellement.');
     });
 }
 
-/**
- * Mise à jour du formulaire selon le moyen de paiement sélectionné
- */
-function updatePaymentForm(e) {
-    const method = e.target.value;
-    const mobilePaymentFields = document.getElementById('mobile-payment-fields');
-    const cardPaymentFields = document.getElementById('card-payment-fields');
+// ── VALIDATION FORMULAIRES ────────────────────────────────────────────────────
 
-    if (['mvola', 'airtel_money', 'orange_money'].includes(method)) {
-        if (mobilePaymentFields) mobilePaymentFields.style.display = 'block';
-        if (cardPaymentFields) cardPaymentFields.style.display = 'none';
-    } else if (method === 'carte_bancaire') {
-        if (mobilePaymentFields) mobilePaymentFields.style.display = 'none';
-        if (cardPaymentFields) cardPaymentFields.style.display = 'block';
-    }
-}
-
-/**
- * Validation du formulaire d'achat
- */
 function validateBuyForm(e) {
-    const montant = document.getElementById('montant').value;
-    const moyenPaiement = document.querySelector('input[name="moyen_paiement"]:checked');
+    const montant = parseFloat(document.getElementById('montant')?.value);
+    const moyen   = document.querySelector('input[name="moyen_paiement"]:checked');
 
-    if (!montant || montant <= 0) {
+    if (!montant || montant < 1000) {
         e.preventDefault();
-        showAlert('danger', 'Veuillez entrer un montant valide');
+        showToast('error', 'Le montant minimum est 1 000 Ar.');
         return false;
     }
-
-    if (!moyenPaiement) {
+    if (!moyen) {
         e.preventDefault();
-        showAlert('danger', 'Veuillez choisir un moyen de paiement');
+        showToast('error', 'Veuillez choisir un moyen de paiement.');
         return false;
     }
-
     return true;
 }
 
-/**
- * Validation du formulaire de validation
- */
-function validateValidateForm(e) {
-    const code = document.getElementById('code').value.trim();
-
+function validateCodeForm(e) {
+    const code = document.getElementById('code')?.value.trim();
     if (!code) {
         e.preventDefault();
-        showAlert('danger', 'Veuillez entrer votre code');
+        showToast('error', 'Veuillez saisir votre code.');
         return false;
     }
-
-    if (code.length < 5) {
+    if (code.length < 8) {
         e.preventDefault();
-        showAlert('danger', 'Le code semble invalide');
+        showToast('error', 'Le code semble incomplet.');
         return false;
     }
-
     return true;
 }
 
-/**
- * Format montant avec séparateurs
- */
-function formatMontant(e) {
-    const value = e.target.value;
-    const numericValue = value.replace(/[^0-9.]/g, '');
-    e.target.value = numericValue;
+// ── FORMAT HELPERS ─────────────────────────────────────────────────────────────
 
-    // Afficher montant formaté
-    const montantInfo = document.getElementById('montant-info');
-    if (montantInfo && numericValue) {
-        const formatted = new Intl.NumberFormat('fr-FR', {
-            style: 'currency',
-            currency: 'MGA',
-            minimumFractionDigits: 0
-        }).format(numericValue);
-
-        montantInfo.textContent = formatted;
-    }
+function sanitizeMontant(e) {
+    e.target.value = e.target.value.replace(/[^0-9]/g, '');
 }
 
-/**
- * Afficher une alerte
- */
-function showAlert(type, message) {
-    const container = document.getElementById('alerts-container');
-    if (!container) return;
-
-    const alert = document.createElement('div');
-    alert.className = `alert alert-${type}`;
-    alert.innerHTML = `
-        ${message}
-        <span class="alert-close" onclick="this.parentElement.remove()">×</span>
-    `;
-
-    container.appendChild(alert);
-
-    // Effacer après 5 secondes
-    if (type !== 'danger') {
-        setTimeout(() => alert.remove(), 5000);
-    }
+function formatCardNumber(e) {
+    let v = e.target.value.replace(/\D/g, '').slice(0, 16);
+    e.target.value = v.replace(/(.{4})/g, '$1 ').trim();
 }
 
-/**
- * Afficher le loading
- */
-function showLoading(selector) {
-    const element = document.querySelector(selector);
-    if (element) {
-        element.classList.add('loading');
-        element.style.opacity = '0.6';
-        element.style.pointerEvents = 'none';
-    }
+function formatExpiry(e) {
+    let v = e.target.value.replace(/\D/g, '').slice(0, 4);
+    if (v.length >= 3) v = v.slice(0, 2) + '/' + v.slice(2);
+    e.target.value = v;
 }
 
-/**
- * Cacher le loading
- */
-function hideLoading(selector) {
-    const element = document.querySelector(selector);
-    if (element) {
-        element.classList.remove('loading');
-        element.style.opacity = '1';
-        element.style.pointerEvents = 'auto';
-    }
+function formatNumber(n) {
+    return new Intl.NumberFormat('fr-MG').format(n);
 }

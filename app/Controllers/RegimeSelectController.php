@@ -118,9 +118,18 @@ class RegimeSelectController extends BaseController
         }
 
         $duree = (int)$this->request->getPost('duree_jours');
-        $poidsInitial = $this->request->getPost('poids_initial');
-        $poidsCible = $this->request->getPost('poids_cible');
-        $prixTotal = $this->request->getPost('prix_total');
+        $user = $this->userModel->find($userId);
+        $objectif = $this->objectifModel->getLatestByUser($userId);
+
+        $poidsInitial = $this->request->getPost('poids_initial') ?? $user['poids'];
+        $poidsCible = $this->request->getPost('poids_cible') ?? ($objectif['poids_cible'] ?? $user['poids']);
+        
+        // RE-CALC PRIX POUR SÉCURITÉ
+        $prixTotal = $this->regimeService->calculatePrice($regime['prix_jour'], $duree);
+        if ($this->regimeService->isGold($userId)) {
+            $prixTotal = $this->regimeService->applyGoldDiscount($prixTotal);
+        }
+        $prixTotal = round($prixTotal, 2);
 
         $user = $this->userModel->find($userId);
 
@@ -145,13 +154,30 @@ class RegimeSelectController extends BaseController
 
         $this->abonnementModel->insert($data);
 
+        // Déduire le solde
+        $nouveauSolde = $user['solde'] - $prixTotal;
         $this->userModel->update($userId, [
-            'solde' => $user['solde'] - $prixTotal
+            'solde' => $nouveauSolde
         ]);
+
+        // Enregistrer la transaction
+        $transactionModel = new \App\Models\TransactionModel();
+        $transactionModel->insert([
+            'utilisateur_id' => $userId,
+            'type_transaction' => 'achat_regime',
+            'montant' => $prixTotal,
+            'ancien_solde' => $user['solde'],
+            'nouveau_solde' => $nouveauSolde,
+            'description' => "Achat régime : " . $regime['nom'] . " (" . $duree . " jours)",
+            'date_transaction' => date('Y-m-d H:i:s')
+        ]);
+
+        session()->set('solde', $nouveauSolde);
 
         return $this->response->setJSON([
             'success' => true,
-            'message' => 'Régime activé avec succès'
+            'message' => 'Régime activé avec succès',
+            'redirect' => base_url('/dashboard')
         ]);
     }
 }

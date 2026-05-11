@@ -8,8 +8,8 @@ use CodeIgniter\Router\RouteCollection;
 
 // Register
 $routes->get('/register', 'RegisterController::index');
-$routes->post('/auth/validation-input', 'RegisterController::validationInput');
 $routes->post('/register', 'RegisterController::store');
+$routes->post('/auth/validation-input', 'RegisterController::validationInput');
 
 
 // Login

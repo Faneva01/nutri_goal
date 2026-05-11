@@ -16,10 +16,44 @@ class StatChiffreAffaireController extends BaseController
             return redirect()->to('/admin/login');
         }
 
+        $db = \Config\Database::connect();
+        
+        // Summary stats
+        $totalRevenue = $db->table('historique_transactions')->selectSum('montant')->get()->getRow()->montant ?? 0;
+        $totalTransactions = $db->table('historique_transactions')->countAllResults();
+        
+        $last30Days = $db->table('historique_transactions')
+            ->selectSum('montant')
+            ->where('date_transaction >=', date('Y-m-d', strtotime('-30 days')))
+            ->get()->getRow()->montant ?? 0;
+
+        // Payment Methods Table
+        $paymentMethods = $db->table('historique_transactions')
+            ->select('type_transaction, SUM(montant) AS total, COUNT(*) AS count')
+            ->groupBy('type_transaction')
+            ->get()->getResultArray();
+
+        $processedMethods = [];
+        foreach ($paymentMethods as $m) {
+            $processedMethods[] = [
+                'name' => ucfirst(str_replace('_', ' ', $m['type_transaction'])),
+                'count' => $m['count'],
+                'total' => $m['total'],
+                'avg' => $m['count'] > 0 ? $m['total'] / $m['count'] : 0,
+                'percent' => $totalRevenue > 0 ? round(($m['total'] / $totalRevenue) * 100, 1) : 0
+            ];
+        }
+
         return view('admin/stats/stat-chiffre-affaire', [
             'title' => 'Statistiques Chiffre d\'Affaires',
             'styles' => ['admin/admin-stats.css'],
-            'scripts' => ['admin/stat-chiffre-affaire.js']
+            'scripts' => ['admin/stat-chiffre-affaire.js'],
+            'summary' => [
+                'total' => $totalRevenue,
+                'count' => $totalTransactions,
+                'last30' => $last30Days
+            ],
+            'methods' => $processedMethods
         ]);
     }
 

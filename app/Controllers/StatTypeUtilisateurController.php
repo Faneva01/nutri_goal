@@ -16,10 +16,28 @@ class StatTypeUtilisateurController extends BaseController
             return redirect()->to('/admin/login');
         }
 
+        $db = \Config\Database::connect();
+        $totalUsers = (int) $db->table('utilisateurs')->countAll();
+        $goldUsers = (int) $db->table('utilisateurs')->where('option_gold', 1)->countAllResults();
+        $simpleUsers = max(0, $totalUsers - $goldUsers);
+
+        $stats = [
+            'simple' => [
+                'count' => $simpleUsers,
+                'percent' => $totalUsers > 0 ? round(($simpleUsers / $totalUsers) * 100, 1) : 0
+            ],
+            'gold' => [
+                'count' => $goldUsers,
+                'percent' => $totalUsers > 0 ? round(($goldUsers / $totalUsers) * 100, 1) : 0
+            ]
+        ];
+
         return view('admin/stats/stat-type-usuarios', [
             'title' => 'Statistiques Types Utilisateurs',
             'styles' => ['admin/admin-stats.css'],
-            'scripts' => ['admin/stat-type-usuarios.js']
+            'scripts' => ['admin/stat-type-usuarios.js'],
+            'stats' => $stats,
+            'total' => $totalUsers
         ]);
     }
 

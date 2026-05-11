@@ -1,3 +1,9 @@
+---
+noteId: "08d1dc704d1111f18a47c384f63b06a4"
+tags: []
+
+---
+
 # 🎯 Back-Office Administrateur - Implémentation Complète
 
 ## 📋 Vue d'Ensemble

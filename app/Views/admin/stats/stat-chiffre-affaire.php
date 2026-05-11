@@ -9,152 +9,110 @@
             <h1 class="admin-stats-title">
                 <i class="fas fa-money-bill-wave"></i> Chiffre d'Affaires
             </h1>
-            <p style="color: #95a5a6; margin-top: 5px;">Analyse complète des revenus et des méthodes de paiement</p>
+            <p style="color: #9a938e; margin-top: 5px;">Analyse des revenus générés par les abonnements et recharges</p>
         </div>
         <div class="stats-controls">
-            <button class="stats-filter active" onclick="loadChartChiffreAffaire()">
+            <button class="stats-filter active" onclick="window.location.reload()">
                 <i class="fas fa-sync"></i> Rafraîchir
             </button>
-            <button class="stats-filter" onclick="exportRevenueData()">
-                <i class="fas fa-download"></i> Export CSV
-            </button>
             <a href="<?= base_url('/admin/dashboard') ?>" class="stats-filter">
-                <i class="fas fa-arrow-left"></i> Tableau de Bord
+                <i class="fas fa-arrow-left"></i> Retour
             </a>
         </div>
     </div>
 
-    {{-- Global Stats --}}
-    <div id="globalStats" data-url="<?= base_url('/admin/api/stats/chiffre-affaire/stats') ?>">
-        {{-- Sera rempli par le JavaScript --}}
-    </div>
-
-    {{-- Charts Grid --}}
-    <div class="admin-stats-grid">
-        <!-- Evolution Chart -->
-        <div class="stats-chart-card">
-            <div class="stats-chart-header">
-                <h3 class="stats-chart-title">
-                    <i class="fas fa-chart-line"></i> Évolution Chiffre d'Affaires
-                </h3>
-            </div>
-            <div class="stats-chart-container">
-                <canvas 
-                    id="chartChiffreAffaire" 
-                    data-url="<?= base_url('/admin/api/stats/chiffre-affaire') ?>">
-                </canvas>
-            </div>
+    <!-- Summary Stats -->
+    <div class="stats-summary">
+        <div class="summary-item">
+            <div class="summary-label">CA Total</div>
+            <div class="summary-value"><?= format_currency_smart($summary['total']) ?></div>
+            <div class="summary-trend">Depuis le lancement</div>
         </div>
 
-        <!-- Payment Methods Chart -->
-        <div class="stats-chart-card">
-            <div class="stats-chart-header">
-                <h3 class="stats-chart-title">
-                    <i class="fas fa-credit-card"></i> Par Méthode de Paiement
-                </h3>
-            </div>
-            <div class="stats-chart-container">
-                <canvas 
-                    id="chartPaymentMethods" 
-                    data-url="<?= base_url('/admin/api/stats/chiffre-affaire/payment-methods') ?>">
-                </canvas>
-            </div>
+        <div class="summary-item">
+            <div class="summary-label">Transactions</div>
+            <div class="summary-value"><?= number_format($summary['count']) ?></div>
+            <div class="summary-trend">Nombre total d'opérations</div>
+        </div>
+
+        <div class="summary-item">
+            <div class="summary-label">CA 30 derniers jours</div>
+            <div class="summary-value"><?= format_currency_smart($summary['last30']) ?></div>
+            <div class="summary-trend">Revenus récents</div>
         </div>
     </div>
 
-    {{-- Payment Methods Details Table --}}
+    <!-- Charts Grid -->
+    <div class="admin-charts-grid">
+        <div class="stats-chart-card">
+            <div class="chart-header">
+                <h3 class="chart-title">
+                    <i class="fas fa-chart-line"></i> Évolution (30j)
+                </h3>
+            </div>
+            <div class="chart-container">
+                <canvas id="chartChiffreAffaire" data-url="<?= base_url('/admin/api/stats/chiffre-affaire') ?>"></canvas>
+            </div>
+        </div>
+
+        <div class="stats-chart-card">
+            <div class="chart-header">
+                <h3 class="chart-title">
+                    <i class="fas fa-pie-chart"></i> Répartition par Type
+                </h3>
+            </div>
+            <div class="chart-container">
+                <canvas id="chartPaymentMethods" data-url="<?= base_url('/admin/api/stats/chiffre-affaire/payment-methods') ?>"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Methods Details Table -->
     <div class="stats-table-card">
+        <div class="panel-header">
+            <h2>Détails par Type de Transaction</h2>
+        </div>
         <table class="stats-table">
             <thead>
                 <tr>
-                    <th>Méthode de Paiement</th>
-                    <th>Nombre de Transactions</th>
+                    <th>Type de Transaction</th>
+                    <th>Nombre</th>
                     <th>Montant Total</th>
-                    <th>Montant Moyen</th>
-                    <th>Popularité</th>
+                    <th>Moyenne / Trans.</th>
+                    <th>Part du CA</th>
                 </tr>
             </thead>
             <tbody>
+                <?php foreach($methods as $m): ?>
                 <tr>
                     <td>
-                        <i class="fas fa-mobile-alt"></i> MVola
+                        <strong><?= $m['name'] ?></strong>
                     </td>
-                    <td>89</td>
-                    <td>18,500 Ar</td>
-                    <td>207.87 Ar</td>
+                    <td><?= $m['count'] ?></td>
+                    <td><?= format_currency_smart($m['total']) ?></td>
+                    <td><?= format_currency_smart($m['avg']) ?></td>
                     <td>
-                        <div class="progress" style="height: 20px;">
-                            <div style="width: 30%; background: #FF6B35; height: 100%; border-radius: 3px; display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: bold;">27.7%</div>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="flex: 1; height: 8px; background: #eee; border-radius: 4px; overflow: hidden;">
+                                <div style="width: <?= $m['percent'] ?>%; background: var(--admin-primary); height: 100%;"></div>
+                            </div>
+                            <span style="font-size: 12px; font-weight: 700; width: 40px;"><?= $m['percent'] ?>%</span>
                         </div>
                     </td>
                 </tr>
+                <?php endforeach; ?>
+                <?php if(empty($methods)): ?>
                 <tr>
-                    <td>
-                        <i class="fas fa-mobile-alt"></i> Airtel Money
-                    </td>
-                    <td>76</td>
-                    <td>15,200 Ar</td>
-                    <td>200 Ar</td>
-                    <td>
-                        <div class="progress" style="height: 20px;">
-                            <div style="width: 24%; background: #004E89; height: 100%; border-radius: 3px; display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: bold;">23.8%</div>
-                        </div>
-                    </td>
+                    <td colspan="5" style="text-align: center; color: #9a938e;">Aucune transaction enregistrée</td>
                 </tr>
-                <tr>
-                    <td>
-                        <i class="fas fa-mobile-alt"></i> Orange Money
-                    </td>
-                    <td>92</td>
-                    <td>22,300 Ar</td>
-                    <td>242.39 Ar</td>
-                    <td>
-                        <div class="progress" style="height: 20px;">
-                            <div style="width: 34%; background: #1B998B; height: 100%; border-radius: 3px; display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: bold;">34.9%</div>
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <i class="fas fa-credit-card"></i> Carte Bancaire
-                    </td>
-                    <td>64</td>
-                    <td>29,420.50 Ar</td>
-                    <td>459.7 Ar</td>
-                    <td>
-                        <div class="progress" style="height: 20px;">
-                            <div style="width: 46%; background: #F7DC6F; height: 100%; border-radius: 3px; display: flex; align-items: center; justify-content: center; color: #333; font-size: 11px; font-weight: bold;">45.9%</div>
-                        </div>
-                    </td>
-                </tr>
+                <?php endif; ?>
             </tbody>
         </table>
     </div>
-
-    {{-- Key Insights --}}
-    <div style="background: white; padding: 20px; border-radius: 8px; margin-top: 20px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
-        <h3 style="margin-top: 0; color: #2c3e50;">
-            <i class="fas fa-chart-bar"></i> Analyse
-        </h3>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-            <div style="border-left: 4px solid #FF6B35; padding: 10px; background-color: #fff8f3;">
-                <small style="color: #666; display: block; margin-bottom: 5px;">CA MVola</small>
-                <strong style="font-size: 18px; color: #FF6B35;">18,500 Ar (27.7%)</strong>
-            </div>
-            <div style="border-left: 4px solid #004E89; padding: 10px; background-color: #f0f5f9;">
-                <small style="color: #666; display: block; margin-bottom: 5px;">CA Airtel Money</small>
-                <strong style="font-size: 18px; color: #004E89;">15,200 Ar (23.8%)</strong>
-            </div>
-            <div style="border-left: 4px solid #1B998B; padding: 10px; background-color: #f0f5f4;">
-                <small style="color: #666; display: block; margin-bottom: 5px;">CA Orange Money</small>
-                <strong style="font-size: 18px; color: #1B998B;">22,300 Ar (34.9%)</strong>
-            </div>
-            <div style="border-left: 4px solid #F7DC6F; padding: 10px; background-color: #fffdf5;">
-                <small style="color: #666; display: block; margin-bottom: 5px;">CA Carte Bancaire</small>
-                <strong style="font-size: 18px; color: #F39C12;">29,420.50 Ar (45.9%)</strong>
-            </div>
-        </div>
-    </div>
 </div>
 
+<?= $this->endSection() ?>
+
+<?= $this->section('scripts') ?>
+<script src="<?= js_url('admin/stat-chiffre-affaire.js') ?>"></script>
 <?= $this->endSection() ?>

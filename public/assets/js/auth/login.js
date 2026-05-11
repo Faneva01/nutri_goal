@@ -10,13 +10,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // TOGGLE PASSWORD
     if (toggleBtn) {
-        toggleBtn.addEventListener("click", (e) => {
+        toggleBtn.addEventListener("click", function(e) {
             e.preventDefault();
-            const isPassword = pass.type === "password";
-            pass.type = isPassword ? "text" : "password";
-            toggleBtn.innerHTML = isPassword 
-                ? '<i class="fas fa-eye-slash"></i>' 
-                : '<i class="fas fa-eye"></i>';
+            e.stopPropagation();
+            
+            const type = pass.getAttribute("type") === "password" ? "text" : "password";
+            pass.setAttribute("type", type);
+            
+            // Update icon
+            const icon = this.querySelector("i");
+            if (icon) {
+                icon.className = type === "password" ? "fas fa-eye" : "fas fa-eye-slash";
+            }
         });
     }
 
@@ -24,14 +29,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (googleBtn) {
         googleBtn.addEventListener("click", (e) => {
             e.preventDefault();
-            alert("Fonctionnalité non implémentée");
+            showToast('info', "Fonctionnalité non implémentée");
         });
     }
 
     if (facebookBtn) {
         facebookBtn.addEventListener("click", (e) => {
             e.preventDefault();
-            alert("Fonctionnalité non implémentée");
+            showToast('info', "Fonctionnalité non implémentée");
         });
     }
 

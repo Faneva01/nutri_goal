@@ -41,48 +41,49 @@
             <?php foreach ($regimes as $regime): ?>
                 <div class="regime-card card">
 
-                    <div class="regime-header-card">
-                        <h3><?= esc($regime['nom']) ?></h3>
+                    <div class="regime-header-card" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                        <h3 style="margin:0; font-size: 18px; font-weight: 800; color: #2d2926;"><?= esc($regime['nom']) ?></h3>
 
-                        <span class="badge badge-<?= esc($regime['type_regime']) ?>">
+                        <span class="badge badge-<?= esc($regime['type_regime']) ?>" style="padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; text-transform: uppercase;">
                             <?= ucfirst($regime['type_regime']) ?>
                         </span>
                     </div>
 
-                    <p class="regime-description">
-                        <?= esc(substr($regime['description'] ?? '', 0, 100)) ?>
+                    <p class="regime-description" style="font-size: 14px; color: #666; margin-bottom: 20px; line-height: 1.5; min-height: 42px;">
+                        <?= esc(substr($regime['description'] ?? '', 0, 100)) ?>...
                     </p>
 
-                    <div class="regime-stats">
+                    <div class="regime-stats" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; padding: 12px; background: #faf7f5; border-radius: 12px;">
                         <div class="stat">
-                            <span class="label">Variation</span>
-                            <span class="value">
-                                <?= esc($regime['variation_quotidienne']) ?> kg/jour
+                            <span class="label" style="display: block; font-size: 11px; color: #9a938e; font-weight: 700; text-transform: uppercase;">Variation</span>
+                            <span class="value" style="font-size: 14px; font-weight: 800; color: #2d2926;">
+                                <?= esc($regime['variation_quotidienne']) ?> kg/j
                             </span>
                         </div>
 
                         <div class="stat">
-                            <span class="label">Intensité</span>
-                            <span class="value">
+                            <span class="label" style="display: block; font-size: 11px; color: #9a938e; font-weight: 700; text-transform: uppercase;">Intensité</span>
+                            <span class="value" style="font-size: 14px; font-weight: 800; color: #2d2926;">
                                 <?= ucfirst($regime['intensite']) ?>
                             </span>
                         </div>
                     </div>
 
-                    <div class="regime-composition">
-                        <span class="comp-item">🥩 <?= esc($regime['pourcentage_viande']) ?>%</span>
-                        <span class="comp-item">🐟 <?= esc($regime['pourcentage_poisson']) ?>%</span>
-                        <span class="comp-item">🍗 <?= esc($regime['pourcentage_volaille']) ?>%</span>
+                    <div class="regime-composition" style="display: flex; gap: 12px; margin-bottom: 24px; font-size: 13px; font-weight: 700;">
+                        <span class="comp-item" style="color: #e67e22;">🥩 <?= esc($regime['pourcentage_viande']) ?>%</span>
+                        <span class="comp-item" style="color: #3498db;">🐟 <?= esc($regime['pourcentage_poisson']) ?>%</span>
+                        <span class="comp-item" style="color: #f1c40f;">🍗 <?= esc($regime['pourcentage_volaille']) ?>%</span>
                     </div>
 
-                    <div class="regime-price">
-                        <span class="prix">
-                            <?= number_format($regime['prix_jour'] ?? 0, 2) ?> €/jour
+                    <div class="regime-price" style="border-top: 1px solid #f0ece8; padding-top: 16px; margin-bottom: 20px; display: flex; align-items: baseline; gap: 4px;">
+                        <span class="prix" style="font-size: 20px; font-weight: 800; color: #E17864;">
+                            <?= format_currency_smart($regime['prix_jour'] ?? 0) ?>
                         </span>
+                        <span style="font-size: 12px; color: #9a938e; font-weight: 600;">/ jour</span>
                     </div>
 
-                    <a href="/regime/<?= $regime['id'] ?>" class="btn btn-primary w-full">
-                        Voir plus
+                    <a href="<?= base_url('/regimes/'.$regime['id']) ?>" class="btn btn-primary w-full" style="padding: 12px; font-weight: 800; border-radius: 12px;">
+                        Détails du programme <i class="fas fa-chevron-right" style="font-size: 10px; margin-left: 4px;"></i>
                     </a>
 
                 </div>

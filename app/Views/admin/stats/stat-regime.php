@@ -24,7 +24,7 @@
         </div>
     </div>
 
-    {{-- Charts Grid --}}
+    <!-- Charts Grid -->
     <div class="admin-stats-grid">
         <!-- Régimes Chart -->
         <div class="stats-chart-card">
@@ -57,102 +57,77 @@
         </div>
     </div>
 
-    {{-- Detailed Statistics --}}
+    <!-- Detailed Statistics -->
     <div id="detailedStatsRegime" data-url="<?= base_url('/admin/api/stats/regime/detailed') ?>">
-        {{-- Sera rempli par le JavaScript --}}
+        <!-- Sera rempli par le JavaScript -->
     </div>
 
-    {{-- Quick Stats --}}
+    <!-- Quick Stats -->
     <div class="stats-summary" style="margin-top: 20px;">
         <div class="summary-item">
             <div class="summary-label">Régime le Plus Populaire</div>
-            <div class="summary-value">Équilibré</div>
+            <div class="summary-value"><?= $popularRegime['nom'] ?? 'Aucun' ?></div>
             <div class="summary-trend">
-                <i class="fas fa-users"></i> 215 utilisateurs (32.1%)
+                <i class="fas fa-users"></i> <?= $popularRegime['count'] ?? 0 ?> utilisateurs
+                <?php if($totalSubscribers > 0 && isset($popularRegime['count'])): ?>
+                    (<?= round(($popularRegime['count'] / $totalSubscribers) * 100, 1) ?>%)
+                <?php endif; ?>
             </div>
         </div>
 
         <div class="summary-item">
-            <div class="summary-label">Meilleure Note</div>
-            <div class="summary-value">4.8/5</div>
+            <div class="summary-label">Activité la Plus Fréquente</div>
+            <div class="summary-value"><?= $popularActivity['nom'] ?? 'Aucune' ?></div>
             <div class="summary-trend">
-                Régime Méditerranéen ⭐⭐⭐⭐⭐
-            </div>
-        </div>
-
-        <div class="summary-item">
-            <div class="summary-label">Plat le Plus Consommé</div>
-            <div class="summary-value">Riz Gras</div>
-            <div class="summary-trend">
-                <i class="fas fa-fire"></i> 287 consommations
+                <i class="fas fa-running"></i> <?= $popularActivity['count'] ?? 0 ?> apparitions
             </div>
         </div>
 
         <div class="summary-item">
             <div class="summary-label">Total Régimes</div>
-            <div class="summary-value">6</div>
+            <div class="summary-value"><?= $totalRegimes ?></div>
             <div class="summary-trend">
-                Tous actifs et populaires
+                Catalogue complet
+            </div>
+        </div>
+
+        <div class="summary-item">
+            <div class="summary-label">Total Abonnements</div>
+            <div class="summary-value"><?= $totalSubscribers ?></div>
+            <div class="summary-trend">
+                Programmes en cours
             </div>
         </div>
     </div>
 
-    {{-- Insights --}}
-    <div style="background: white; padding: 20px; border-radius: 8px; margin-top: 20px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
-        <h3 style="margin-top: 0; color: #2c3e50;">
-            <i class="fas fa-lightbulb"></i> Insights Nutritionnels
+    <!-- Insights -->
+    <div style="background: white; padding: 24px; border-radius: 16px; margin-top: 24px; border: 1px solid #f0ece8; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
+        <h3 style="margin-top: 0; color: #2d2926; font-size: 18px; font-weight: 800; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-lightbulb" style="color: var(--admin-accent);"></i> Insights Nutritionnels
         </h3>
-        <ul style="color: #555; line-height: 1.8;">
-            <li><strong>Tendance Massive:</strong> 32.1% des utilisateurs optent pour un régime équilibré</li>
-            <li><strong>Haute Satisfaction:</strong> Le régime méditerranéen affiche une note de 4.8/5</li>
-            <li><strong>Plat Signature:</strong> Le Riz Gras domine avec 287 consommations</li>
-            <li><strong>Diversification:</strong> Les utilisateurs sont distribués entre 6 régimes différents, pas de concentration excessive</li>
-            <li><strong>Recommandation:</strong> Mettre l'accent sur le marketing du régime Méditerranéen</li>
-        </ul>
-    </div>
-
-    {{-- Performance Comparison --}}
-    <div style="background: white; padding: 20px; border-radius: 8px; margin-top: 20px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
-        <h3 style="margin-top: 0; color: #2c3e50;">
-            <i class="fas fa-columns"></i> Comparaison Complète
-        </h3>
-        <div style="overflow-x: auto;">
-            <table class="stats-table">
-                <thead>
-                    <tr>
-                        <th>Statut</th>
-                        <th>Type</th>
-                        <th>Nombre</th>
-                        <th>Pourcentage</th>
-                        <th>Note</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><i class="fas fa-star" style="color: #FFD700;"></i></td>
-                        <td><strong>Très Populaire</strong></td>
-                        <td>189 utilisateurs</td>
-                        <td>28.2%</td>
-                        <td>⭐⭐⭐⭐⭐ 4.8/5</td>
-                    </tr>
-                    <tr>
-                        <td><i class="fas fa-star" style="color: #FFA500;"></i></td>
-                        <td><strong>Populaire</strong></td>
-                        <td>357 utilisateurs</td>
-                        <td>53.3%</td>
-                        <td>⭐⭐⭐⭐ ~4.4/5</td>
-                    </tr>
-                    <tr>
-                        <td><i class="fas fa-star" style="color: #9B9B9B;"></i></td>
-                        <td><strong>Modéré</strong></td>
-                        <td>174 utilisateurs</td>
-                        <td>26.0%</td>
-                        <td>⭐⭐⭐ ~4.3/5</td>
-                    </tr>
-                </tbody>
-            </table>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px;">
+            <?php if(isset($popularRegime)): ?>
+                <div style="padding: 16px; background: #faf7f5; border-radius: 12px; display: flex; align-items: flex-start; gap: 12px; border: 1px solid #fcfaf8;">
+                    <i class="fas fa-star" style="color: #f1c40f; margin-top: 3px;"></i>
+                    <p style="margin: 0; color: #555; font-size: 14px; line-height: 1.5;">Le régime <strong><?= $popularRegime['nom'] ?></strong> est actuellement le plus plébiscité par les utilisateurs.</p>
+                </div>
+            <?php endif; ?>
+            <?php if(isset($popularActivity)): ?>
+                <div style="padding: 16px; background: #FEF0EC; border-radius: 12px; display: flex; align-items: flex-start; gap: 12px; border: 1px solid #fcece8;">
+                    <i class="fas fa-heart" style="color: var(--admin-primary); margin-top: 3px;"></i>
+                    <p style="margin: 0; color: #555; font-size: 14px; line-height: 1.5;">L'activité <strong><?= $popularActivity['nom'] ?></strong> est la composante la plus fréquente de nos programmes.</p>
+                </div>
+            <?php endif; ?>
+            <div style="padding: 16px; background: #f0fff4; border-radius: 12px; display: flex; align-items: flex-start; gap: 12px; border: 1px solid #dcfce7;">
+                <i class="fas fa-check-circle" style="color: #27ae60; margin-top: 3px;"></i>
+                <p style="margin: 0; color: #555; font-size: 14px; line-height: 1.5;">Nous proposons <strong><?= $totalRegimes ?></strong> approches différentes pour <strong><?= $totalSubscribers ?></strong> suivis en cours.</p>
+            </div>
         </div>
     </div>
 </div>
 
+<?= $this->endSection() ?>
+
+<?= $this->section('scripts') ?>
+<script src="<?= js_url('admin/stat-regime.js') ?>"></script>
 <?= $this->endSection() ?>

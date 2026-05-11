@@ -15,16 +15,23 @@
     box-shadow: 0 10px 35px rgba(0,0,0,0.08);
 }
 
+.auth-header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
 .auth-title {
     font-size: 28px;
     font-weight: 800;
     margin-bottom: 5px;
+    text-align: center;
+    color: #E17864;
 }
 
 .auth-subtitle {
     font-size: 14px;
     opacity: 0.7;
-    margin-bottom: 25px;
+    text-align: center;
 }
 
 .form-group {
@@ -216,10 +223,13 @@
 
 .password-wrapper .input {
     flex: 1;
-    border: none;
-    background: none;
+    border: none !important;
+    background: none !important;
     padding: 12px 0;
     padding-right: 8px;
+    width: auto !important;
+    min-width: 0;
+    box-shadow: none !important;
 }
 
 .password-wrapper .input:focus {

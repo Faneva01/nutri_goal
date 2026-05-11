@@ -18,8 +18,17 @@ class ObjectifController extends BaseController
      */
     public function store()
     {
+        $userId = session('user_id');
+
+        if (!$userId) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Non authentifié'
+            ]);
+        }
+
         $data = [
-            'utilisateur_id' => $this->request->getPost('utilisateur_id'),
+            'utilisateur_id' => $userId,
             'type_objectif'  => $this->request->getPost('type_objectif'),
             'poids_cible'    => $this->request->getPost('poids_cible'),
         ];
@@ -52,10 +61,40 @@ class ObjectifController extends BaseController
     }
 
     /**
-     * OBJECTIF UTILISATEUR
+     * OBJECTIF UTILISATEUR (par ID)
      */
     public function getByUser(int $userId)
     {
+        $objectif = $this->objectifModel->getLatestByUser($userId);
+
+        if (!$objectif) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Aucun objectif trouvé'
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'success' => true,
+            'data' => $objectif
+        ]);
+    }
+
+    /**
+     * OBJECTIF DE L'UTILISATEUR CONNECTÉ
+     */
+    public function getMyObjectif()
+    {
+        $userId = session('user_id');
+
+        if (!$userId) {
+            return redirect()->to('/login');
+        }
+
+        if (!$this->request->isAJAX()) {
+            return redirect()->to('/profil#objectifs');
+        }
+
         $objectif = $this->objectifModel->getLatestByUser($userId);
 
         if (!$objectif) {

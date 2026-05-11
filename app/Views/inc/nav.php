@@ -52,11 +52,6 @@
 
         <div class="nav-dropdown-menu">
 
-            <a href="<?= base_url('/paiement') ?>" class="dropdown-link">
-                <i class="fas fa-credit-card"></i>
-                Paiement
-            </a>
-
             <a href="<?= base_url('/code/achat') ?>" class="dropdown-link">
                 <i class="fas fa-bag-shopping"></i>
                 Acheter un code
@@ -104,7 +99,7 @@
 
         <span class="nav-solde">
             <i class="fas fa-coins"></i>
-            <?= esc(number_format((float)(session()->get('solde') ?? 0), 0)) ?> Ar
+            <?= format_currency_smart(session()->get('solde') ?? 0) ?>
         </span>
 
         <a href="<?= base_url('/logout') ?>" class="btn-nav-logout">

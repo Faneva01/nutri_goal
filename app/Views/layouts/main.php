@@ -37,10 +37,22 @@ $show_navbar = $show_navbar ?? true;
     <!-- CONTENU PAGE -->
     <?= $this->renderSection('content') ?>
 
+    <!-- JS GLOBALS -->
+    <script>
+      window.baseUrl = "<?= rtrim(base_url(), '/') ?>";
+      window.csrfToken = "<?= csrf_hash() ?>";
+      window.csrfHeader = "<?= csrf_header() ?>";
+    </script>
+    
+    <!-- JS système -->
+    <script src="<?= base_url('assets/js/script.js') ?>"></script>
+    
+    <!-- Toast Container -->
+    <div id="toast" class="toast"></div>
+
     <!-- JS spécifiques page -->
     <?php foreach ($scripts as $script): ?>
         <script src="<?= js_url($script) ?>"></script>
     <?php endforeach; ?>
-
 </body>
 </html>

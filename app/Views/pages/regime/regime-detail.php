@@ -6,7 +6,7 @@
 
 <section class="regime-detail">
 
-<a href="/regime" class="back-link">← Retour aux régimes</a>
+<a href="<?= base_url('/regimes') ?>" class="back-link">← Retour aux régimes</a>
 
 <div class="regime-detail-header">
 
@@ -43,7 +43,7 @@
 
                 <div class="char-item">
                     <span>Prix</span>
-                    <strong><?= number_format($regime['prix_jour'], 2) ?> €</strong>
+                    <strong><?= number_format($regime['prix_jour'], 2) ?> Ar</strong>
                 </div>
 
             </div>

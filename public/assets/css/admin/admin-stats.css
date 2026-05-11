@@ -1,20 +1,23 @@
 /* Admin Statistics Common Styles */
 
 :root {
-    --admin-primary: #2c3e50;
-    --admin-secondary: #34495e;
-    --admin-accent: #3498db;
-    --admin-danger: #e74c3c;
+    --admin-primary: #E17864;
+    --admin-primary-light: #FEF0EC;
+    --admin-accent: #FAB863;
+    --admin-secondary: #6A7C4F;
     --admin-success: #27ae60;
-    --admin-warning: #f39c12;
-    --admin-info: #16a085;
-    --admin-light: #ecf0f1;
-    --admin-dark: #2c3e50;
+    --admin-danger: #e74c3c;
+    --admin-bg: #fdfaf8;
+    --admin-sidebar: #2d2926;
+    --admin-dark: #2d2926;
+    --sidebar-width: 260px;
+    --header-height: 64px;
+    --font: 'Manrope', sans-serif;
 }
 
 .admin-stats-container {
-    padding: 20px;
-    background-color: #f5f7fa;
+    padding: 0;
+    background-color: transparent;
     min-height: 100vh;
 }
 

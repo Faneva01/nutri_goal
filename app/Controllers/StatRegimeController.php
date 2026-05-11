@@ -16,10 +16,40 @@ class StatRegimeController extends BaseController
             return redirect()->to('/admin/login');
         }
 
+        $db = \Config\Database::connect();
+        
+        // Régime le plus populaire
+        $popularRegime = $db->table('abonnements_regimes ar')
+            ->select('r.nom, COUNT(ar.id) as count')
+            ->join('regimes r', 'r.id = ar.regime_id')
+            ->groupBy('r.id')
+            ->orderBy('count', 'DESC')
+            ->limit(1)
+            ->get()
+            ->getRowArray();
+
+        $totalSubscribers = $db->table('abonnements_regimes')->countAllResults();
+        
+        // Plat (activité) le plus populaire
+        $popularActivity = $db->table('regime_activite ra')
+            ->select('a.nom, COUNT(ra.id) as count')
+            ->join('activites_sportives a', 'a.id = ra.activite_id')
+            ->groupBy('a.id')
+            ->orderBy('count', 'DESC')
+            ->limit(1)
+            ->get()
+            ->getRowArray();
+
+        $totalRegimes = $db->table('regimes')->countAll();
+
         return view('admin/stats/stat-regime', [
             'title' => 'Statistiques Régimes et Plats',
             'styles' => ['admin/admin-stats.css'],
-            'scripts' => ['admin/stat-regime.js']
+            'scripts' => ['admin/stat-regime.js'],
+            'popularRegime' => $popularRegime,
+            'totalSubscribers' => $totalSubscribers,
+            'popularActivity' => $popularActivity,
+            'totalRegimes' => $totalRegimes
         ]);
     }
 

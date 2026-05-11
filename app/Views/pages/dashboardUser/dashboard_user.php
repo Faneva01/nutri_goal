@@ -122,9 +122,9 @@
                     <canvas id="macroChart" width="200" height="200"></canvas>
                 </div>
                 <div class="legend">
-                    <span><span class="dot prot"></span>Viande</span>
-                    <span><span class="dot gluc"></span>Volaille</span>
-                    <span><span class="dot lip"></span>Poisson</span>
+                    <span><span class="dot prot"></span>Protéines (Viande)</span>
+                    <span><span class="dot gluc"></span>Glucides (Volaille)</span>
+                    <span><span class="dot lip"></span>Lipides (Poisson)</span>
                 </div>
             </article>
 

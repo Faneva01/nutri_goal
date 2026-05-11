@@ -13,48 +13,66 @@ $adminName = $adminName ?? session()->get('admin_name');
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= esc($title) ?></title>
 
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <!-- CSS global -->
     <link rel="stylesheet" href="<?= css_url('style.css') ?>">
-    <link rel="stylesheet" href="<?= css_url('profil-page.css') ?>">
-    <link rel="stylesheet" href="<?= css_url('admin/admin-layout.css') ?>">
-
+    <link rel="stylesheet" href="<?= css_url('admin/admin-dashboard.css') ?>">
+    
     <!-- CSS spécifiques page -->
     <?php foreach ($styles as $style): ?>
         <link rel="stylesheet" href="<?= css_url($style) ?>">
     <?php endforeach; ?>
 </head>
 
-<body>
+<body class="admin-body <?php if(str_contains(uri_string(), 'admin/auth') || str_contains(uri_string(), 'admin/login')): ?>no-sidebar<?php endif; ?>">
+    
     <div class="admin-shell">
-        <?= view('admin/inc/sidebar', ['admin_name' => $adminName]) ?>
+        <!-- SIDEBAR -->
+        <?php if(!str_contains(uri_string(), 'admin/auth') && !str_contains(uri_string(), 'admin/login')): ?>
+            <?= view('admin/inc/sidebar', ['admin_name' => $adminName]) ?>
+        <?php endif; ?>
 
-        <div class="admin-page">
-            <header class="navbar admin-navbar">
-                <div class="navbar-left">
-                    <a href="<?= base_url('/admin/dashboard') ?>" class="logo">
-                        <span class="logo-icon"><i class="fas fa-leaf"></i></span>
-                        <span class="logo-text">NutriGoal Admin</span>
-                    </a>
-                </div>
-                <div class="navbar-right">
-                    <a class="nav-link" href="<?= base_url('/') ?>">Retour au site</a>
-                    <a class="avatar-btn" href="<?= base_url('/admin/auth/logout') ?>">
-                        <span class="nav-avatar"><i class="fas fa-user-shield"></i></span>
-                        <span><?= esc($adminName ?? 'Admin') ?></span>
-                    </a>
-                </div>
-            </header>
-
-            <main class="admin-content container">
+        <!-- MAIN CONTENT AREA -->
+        <div class="admin-main-wrapper">
+            <main class="admin-page-content">
                 <?= $this->renderSection('content') ?>
             </main>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
-    <?php foreach ($scripts as $script): ?>
-        <script src="<?= js_url($script) ?>"></script>
-    <?php endforeach; ?>
+    <?php if(!str_contains(uri_string(), 'admin/auth') && !str_contains(uri_string(), 'admin/login')): ?>
+    <script>
+        // Mobile sidebar toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggle = document.getElementById('sidebarToggle');
+            const sidebar = document.querySelector('.admin-sidebar');
+            
+            if (toggle && sidebar) {
+                toggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('open-mobile');
+                });
+                
+                // Close sidebar when clicking outside on mobile
+                document.addEventListener('click', function(e) {
+                    if (window.innerWidth <= 992) {
+                        if (!sidebar.contains(e.target) && !toggle.contains(e.target)) {
+                            sidebar.classList.remove('open-mobile');
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+    <?php endif; ?>
+    
+    <?= $this->renderSection('scripts') ?>
 </body>
-
 </html>

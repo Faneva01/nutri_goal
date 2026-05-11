@@ -12,7 +12,7 @@
         </div>
 
         <form id="loginForm" class="form">
-
+            <?= csrf_field() ?>
             <div id="err-global" class="error-global"></div>
 
             <!-- EMAIL -->
@@ -58,6 +58,8 @@
         <p class="auth-footer">
             Pas encore de compte ?
             <a href="/register" class="link">S'inscrire</a>
+            <br>
+            <span class="admin-prompt">Vous êtes admin ? <a href="/admin/login" class="link">Se connecter ici</a></span>
         </p>
 
     </section>

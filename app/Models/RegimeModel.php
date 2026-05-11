@@ -34,4 +34,9 @@ class RegimeModel extends Model
                     ->where('actif', 1)
                     ->findAll();
     }
+
+    public function getById(int $id): ?array
+    {
+        return $this->where('id', $id)->where('actif', 1)->first();
+    }
 }

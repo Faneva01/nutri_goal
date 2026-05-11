@@ -15,14 +15,11 @@
 
         <!-- PROGRESSION -->
         <div class="register-progress">
-
             <div class="circles">
                 <div class="progress-step active">
                     <div class="step-circle">1</div>
                 </div>
-
                 <div class="progress-line"></div>
-
                 <div class="progress-step">
                     <div class="step-circle">2</div>
                 </div>
@@ -31,33 +28,28 @@
                 <span>Compte</span>
                 <span>Santé</span>
             </div>
-
         </div>
 
-        <form action="/register" method="post" class="form" id="registerForm">
+        <form method="post" class="form" id="registerForm">
 
             <?= csrf_field() ?>
 
             <!-- STEP 1 -->
             <div class="form-step active" id="step-1">
-
                 <div id="err-step1" class="error-global"></div>
 
-                <!-- NOM -->
                 <div class="form-group">
                     <label>Nom complet</label>
                     <input type="text" id="nom_complet" name="nom_complet" class="input">
                     <small class="error-msg" id="err-nom_complet"></small>
                 </div>
 
-                <!-- EMAIL -->
                 <div class="form-group">
                     <label>Email</label>
                     <input type="email" id="email" name="email" class="input">
                     <small class="error-msg" id="err-email"></small>
                 </div>
 
-                <!-- PASSWORD -->
                 <div class="form-group">
                     <label>Mot de passe</label>
                     <div class="password-wrapper">
@@ -69,7 +61,6 @@
                     <small class="error-msg" id="err-mot_de_passe"></small>
                 </div>
 
-                <!-- CONFIRM -->
                 <div class="form-group">
                     <label>Confirmation</label>
                     <div class="password-wrapper">
@@ -81,32 +72,26 @@
                     <small class="error-msg" id="err-confirm"></small>
                 </div>
 
-                <!-- GENRE -->
                 <div class="form-group">
                     <label>Genre</label>
-
                     <div class="radio-group">
                         <label class="radio-option">
                             <input type="radio" name="genre" value="M">
                             <span>Homme</span>
                         </label>
-
                         <label class="radio-option">
                             <input type="radio" name="genre" value="F">
                             <span>Femme</span>
                         </label>
-
                         <label class="radio-option">
                             <input type="radio" name="genre" value="Autre">
                             <span>Autre</span>
                         </label>
                     </div>
-
                     <small class="error-msg" id="err-genre"></small>
                 </div>
                 
                 <div class="form-actions">
-
                     <button type="button" id="next-btn" class="btn btn-primary w-full">
                         Continuer <i class="fas fa-arrow-right"></i>
                     </button>
@@ -115,7 +100,6 @@
 
             <!-- STEP 2 -->
             <div class="form-step" id="step-2">
-
                 <div class="form-group">
                     <label>Taille (cm)</label>
                     <input type="number" id="taille" name="taille" class="input">
@@ -129,17 +113,13 @@
                 </div>
 
                 <div class="form-actions">
-
                     <button type="button" id="prev-btn" class="btn btn-secondary">
                         <i class="fas fa-arrow-left"></i> Retour
                     </button>
-
                     <button type="submit" class="btn btn-primary">
-                        S'inscrire <i class="fas fa-arrow-right"></i>
+                        S'inscrire <i class="fas fa-check"></i>
                     </button>
-
                 </div>
-
             </div>
 
         </form>

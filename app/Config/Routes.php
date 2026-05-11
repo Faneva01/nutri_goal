@@ -10,6 +10,7 @@ use CodeIgniter\Router\RouteCollection;
 
 $routes->get("/", [DashboardUserController::class, 'index']);
 
+require APPPATH . 'Config/Routes/admin_routes.php';
 require APPPATH . 'Config/Routes/auth_route.php';
 require APPPATH . 'Config/Routes/dashboard_user_routes.php';
 require APPPATH . 'Config/Routes/regime_route.php';

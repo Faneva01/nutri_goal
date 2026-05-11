@@ -33,7 +33,7 @@ class DashboardUserModel extends Model
                 'historique'    => $this->getTransactionHistory($resolvedUserId),
                 'weightSeries'  => $this->getDailyWeightSeries($resolvedUserId, (float) ($user['poids'] ?? 0)),
                 'currentRegime' => $this->getCurrentRegime($resolvedUserId),
-                'caloriesSeries' => $this->buildCaloriesSeries(),
+                'caloriesSeries' => $this->buildCaloriesSeries($resolvedUserId),
                 'db_down'       => false,
             ];
         } catch (\Throwable $e) {
@@ -199,11 +199,31 @@ class DashboardUserModel extends Model
 
     private function getDailyWeightSeries(int $userId, float $fallbackWeight): array
     {
+        if ($userId <= 0 || !$this->safeTableExists('suivi_poids')) {
+            $series = [];
+            for ($i = 6; $i >= 0; $i--) {
+                $series[] = ['day' => date('d/m', strtotime("-{$i} day")), 'weight' => $fallbackWeight];
+            }
+            return $series;
+        }
+
+        $rows = $this->db->table('suivi_poids')
+            ->where('utilisateur_id', $userId)
+            ->where('date_suivi >=', date('Y-m-d', strtotime('-6 days')))
+            ->orderBy('date_suivi', 'ASC')
+            ->get()->getResultArray();
+
+        $map = [];
+        foreach ($rows as $r) {
+            $map[date('d/m', strtotime($r['date_suivi']))] = (float) $r['poids'];
+        }
+
         $series = [];
         for ($i = 6; $i >= 0; $i--) {
+            $day = date('d/m', strtotime("-{$i} day"));
             $series[] = [
-                'day'    => date('d/m', strtotime("-{$i} day")),
-                'weight' => $fallbackWeight,
+                'day'    => $day,
+                'weight' => $map[$day] ?? $fallbackWeight,
             ];
         }
         return $series;
@@ -212,7 +232,7 @@ class DashboardUserModel extends Model
     private function mapGoalToKcal(?string $goalType): int
     {
         return match ($goalType) {
-            'prise'    => 2600,
+            'prise'    => 2800,
             'perte'    => 1800,
             'imc_ideal' => 2200,
             default    => 2200,
@@ -255,18 +275,34 @@ class DashboardUserModel extends Model
         ];
     }
 
-    private function buildCaloriesSeries(): array
+    private function buildCaloriesSeries(?int $userId = null): array
     {
-        return [
-            ['month' => 'Oct', 'value' => 2100],
-            ['month' => 'Nov', 'value' => 1950],
-            ['month' => 'Déc', 'value' => 2050],
-            ['month' => 'Jan', 'value' => 1820],
-            ['month' => 'Fév', 'value' => 1760],
-            ['month' => 'Mar', 'value' => 1710],
-            ['month' => 'Avr', 'value' => 1650],
-            ['month' => 'Mai', 'value' => 1600],
-        ];
+        if (!$userId || !$this->safeTableExists('suivi_calories')) {
+            return [
+                ['month' => 'Jan', 'value' => 1820],
+                ['month' => 'Fév', 'value' => 1760],
+                ['month' => 'Mar', 'value' => 1710],
+                ['month' => 'Avr', 'value' => 1650],
+                ['month' => 'Mai', 'value' => 1600],
+            ];
+        }
+
+        $rows = $this->db->table('suivi_calories')
+            ->select('calories, date_suivi')
+            ->where('utilisateur_id', $userId)
+            ->orderBy('date_suivi', 'ASC')
+            ->get(12)->getResultArray();
+
+        if (empty($rows)) {
+             return [['month' => date('d/m'), 'value' => 0]];
+        }
+
+        return array_map(function($r) {
+            return [
+                'month' => date('d/m', strtotime($r['date_suivi'])),
+                'value' => (int) $r['calories']
+            ];
+        }, $rows);
     }
 
     private function formatPeriod(string $start, string $end): string

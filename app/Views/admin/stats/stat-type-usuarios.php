@@ -24,7 +24,7 @@
         </div>
     </div>
 
-    {{-- Main Chart --}}
+    <!-- Main Chart -->
     <div class="admin-stats-grid">
         <div class="stats-chart-card">
             <div class="stats-chart-header">
@@ -41,12 +41,12 @@
         </div>
     </div>
 
-    {{-- Detailed Statistics --}}
+    <!-- Detailed Statistics -->
     <div id="detailedStats" data-url="<?= base_url('/admin/api/stats/type-usuarios/detailed') ?>">
-        {{-- Sera rempli par le JavaScript --}}
+        <!-- Sera rempli par le JavaScript -->
     </div>
 
-    {{-- Comparison Table --}}
+    <!-- Comparison Table -->
     <div class="stats-table-card" style="margin-top: 20px;">
         <table class="stats-table">
             <thead>
@@ -63,8 +63,8 @@
                     <td>
                         <i class="fas fa-user"></i> Simple
                     </td>
-                    <td><strong>312</strong></td>
-                    <td>50.2%</td>
+                    <td><strong><?= $stats['simple']['count'] ?></strong></td>
+                    <td><?= $stats['simple']['percent'] ?>%</td>
                     <td>Gratuit</td>
                     <td><span class="stats-badge stats-badge-info">Accès Basique</span></td>
                 </tr>
@@ -72,36 +72,45 @@
                     <td>
                         <i class="fas fa-crown" style="color: #ffc107;"></i> Gold
                     </td>
-                    <td><strong>187</strong></td>
-                    <td>30.1%</td>
-                    <td>5,990 Ar/mois</td>
-                    <td><span class="stats-badge stats-badge-warning">Plans Personnalisés</span></td>
-                </tr>
-                <tr>
-                    <td>
-                        <i class="fas fa-gem" style="color: #e83e8c;"></i> Premium
-                    </td>
-                    <td><strong>0</strong></td>
-                    <td>0%</td>
-                    <td>-</td>
-                    <td><span class="stats-badge stats-badge-info">Non défini</span></td>
+                    <td><strong><?= $stats['gold']['count'] ?></strong></td>
+                    <td><?= $stats['gold']['percent'] ?>%</td>
+                    <td>50 000 Ar (Unique)</td>
+                    <td><span class="stats-badge stats-badge-warning">Option Gold</span></td>
                 </tr>
             </tbody>
         </table>
     </div>
 
-    {{-- Insights --}}
-    <div style="background: white; padding: 20px; border-radius: 8px; margin-top: 20px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
-        <h3 style="margin-top: 0; color: #2c3e50;">
-            <i class="fas fa-lightbulb"></i> Insights
+    <!-- Insights -->
+    <div style="background: white; padding: 24px; border-radius: 16px; margin-top: 24px; border: 1px solid #f0ece8; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
+        <h3 style="margin-top: 0; color: #2d2926; font-size: 18px; font-weight: 800; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-lightbulb" style="color: var(--admin-accent);"></i> Insights Plateforme
         </h3>
-        <ul style="color: #555; line-height: 1.8;">
-            <li>La majorité des utilisateurs (50.2%) sont en abonnement Simple</li>
-            <li>30.1% des utilisateurs ont souscrit à Gold avec des plans personnalisés</li>
-            <li>La majorité des utilisateurs sont en abonnement Simple ou sans option Gold</li>
-            <li>Potentiel d'upsell: les utilisateurs Simple peuvent être convertis à Gold</li>
-        </ul>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px;">
+            <div style="padding: 16px; background: #faf7f5; border-radius: 12px; display: flex; align-items: flex-start; gap: 12px; border: 1px solid #fcfaf8;">
+                <i class="fas fa-info-circle" style="color: #3498db; margin-top: 3px;"></i>
+                <p style="margin: 0; color: #555; font-size: 14px; line-height: 1.5;">La majorité des utilisateurs (<strong><?= $stats['simple']['percent'] ?>%</strong>) utilisent actuellement la version gratuite.</p>
+            </div>
+            <div style="padding: 16px; background: #FEF0EC; border-radius: 12px; display: flex; align-items: flex-start; gap: 12px; border: 1px solid #fcece8;">
+                <i class="fas fa-crown" style="color: var(--admin-primary); margin-top: 3px;"></i>
+                <p style="margin: 0; color: #555; font-size: 14px; line-height: 1.5;"><strong><?= $stats['gold']['percent'] ?>%</strong> des membres ont activé l'Option Gold.</p>
+            </div>
+            <div style="padding: 16px; background: #f0fff4; border-radius: 12px; display: flex; align-items: flex-start; gap: 12px; border: 1px solid #dcfce7;">
+                <i class="fas fa-users" style="color: #27ae60; margin-top: 3px;"></i>
+                <p style="margin: 0; color: #555; font-size: 14px; line-height: 1.5;">Vous gérez actuellement une communauté de <strong><?= $total ?></strong> utilisateurs actifs.</p>
+            </div>
+            <?php if($stats['simple']['percent'] > 0): ?>
+                <div style="padding: 16px; background: #fffaf0; border-radius: 12px; display: flex; align-items: flex-start; gap: 12px; border: 1px solid #fef3c7;">
+                    <i class="fas fa-rocket" style="color: #f39c12; margin-top: 3px;"></i>
+                    <p style="margin: 0; color: #555; font-size: 14px; line-height: 1.5;"><strong>Opportunité :</strong> Les <?= $stats['simple']['count'] ?> utilisateurs Simple sont des prospects directs pour l'Option Gold.</p>
+                </div>
+            <?php endif; ?>
+        </div>
     </div>
 </div>
 
+<?= $this->endSection() ?>
+
+<?= $this->section('scripts') ?>
+<script src="<?= js_url('admin/stat-type-usuarios.js') ?>"></script>
 <?= $this->endSection() ?>

@@ -76,10 +76,6 @@
                   <option value="M"     <?= ($user['genre'] ?? '') === 'M'     ? 'selected' : '' ?>>Homme</option>
                   <option value="Autre" <?= ($user['genre'] ?? '') === 'Autre' ? 'selected' : '' ?>>Autre</option>
                 </select>
-                <svg class="select-arrow" xmlns="http://www.w3.org/2000/svg" width="14" height="14"
-                     fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path d="M6 9l6 6 6-6"/>
-                </svg>
               </div>
             </div>
             <div class="form-group">
@@ -147,17 +143,41 @@
           <div class="objectif-card">
             <p class="objectif-title">Récapitulatif</p>
             <div class="objectif-row">
-              <span>Objectif principal</span>
-              <span><?= esc($user['objectif_principal'] ?? 'Non défini') ?></span>
+              <span>Type d'objectif</span>
+              <span id="current-obj-type"><?= esc(ucfirst($objectif['type_objectif'] ?? 'Non défini')) ?></span>
             </div>
             <div class="objectif-row">
-              <span>Cible</span>
-              <span><?= esc($user['objectif_cible'] ?? '—') ?></span>
+              <span>Poids cible</span>
+              <span id="current-obj-poids"><?= esc(isset($objectif['poids_cible']) ? number_format($objectif['poids_cible'], 1) . ' kg' : '—') ?></span>
             </div>
             <div class="objectif-row">
-              <span>Dernier suivi</span>
-              <span><?= esc($user['dernier_poids'] ?? '—') ?></span>
+              <span>Poids actuel</span>
+              <span><?= esc(number_format((float)($user['poids'] ?? 0), 1)) ?> kg</span>
             </div>
+          </div>
+
+          <!-- FORMULAIRE CHANGEMENT OBJECTIF -->
+          <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid #f0ece8;">
+            <p style="font-size: 14px; font-weight: 700; color: #2d2926; margin-bottom: 16px;">Modifier mon objectif</p>
+            <div class="form-row">
+              <div class="form-group" style="flex: 1;">
+                <label>Nouvel objectif</label>
+                <div class="select-wrapper">
+                  <select id="new_type_objectif">
+                    <option value="perte"     <?= ($objectif['type_objectif'] ?? '') === 'perte'     ? 'selected' : '' ?>>Perte de poids</option>
+                    <option value="prise"     <?= ($objectif['type_objectif'] ?? '') === 'prise'     ? 'selected' : '' ?>>Prise de masse</option>
+                    <option value="imc_ideal" <?= ($objectif['type_objectif'] ?? '') === 'imc_ideal' ? 'selected' : '' ?>>Atteindre l'IMC idéal</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group" style="flex: 1;">
+                <label>Poids cible (kg)</label>
+                <input type="number" id="new_poids_cible" value="<?= esc($objectif['poids_cible'] ?? 70) ?>" step="0.1" class="input" style="padding: 10px; border-radius: 8px; border: 1px solid #ddd; width: 100%;" />
+              </div>
+            </div>
+            <button class="save-btn" onclick="updateObjectif()" type="button" style="background: #FAB863; margin-top: 10px; width: 100%; border: none; padding: 12px; border-radius: 8px; color: white; font-weight: 700; cursor: pointer;">
+              <i class="fas fa-sync-alt"></i> Mettre à jour l'objectif
+            </button>
           </div>
         </article>
 
@@ -205,7 +225,7 @@
           <hr class="divider" />
           <div class="balance-section">
             <span class="balance-label">Solde actuel</span>
-            <span class="balance-amount" id="balance"><?= number_format((float)($user['solde'] ?? 0), 2) ?> €</span>
+            <span class="balance-amount" id="balance"><?= number_format((float)($user['solde'] ?? 0), 0) ?> Ar</span>
           </div>
           <hr class="divider" />
           <div class="recharge-section">
@@ -266,9 +286,34 @@
     </div><!-- /profil-body -->
   </div><!-- /container -->
 
-</div><!-- /profil-wrap -->
+  <!-- MODAL ACTIVATION GOLD -->
+  <div id="goldModal" class="modal">
+    <div class="modal-content dash-panel">
+      <div class="modal-header">
+        <h2><i class="fas fa-crown" style="color: #FAB863;"></i> Activer l'Option Gold</h2>
+        <button class="close-modal" onclick="closeGoldModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>Devenez membre <strong>Gold</strong> pour bénéficier de remises exclusives sur tous vos programmes.</p>
+        <ul class="gold-benefits">
+          <li><i class="fas fa-check"></i> <strong>-15% de remise à vie</strong> sur tous les régimes.</li>
+          <li><i class="fas fa-check"></i> Accès prioritaire aux nouvelles recommandations.</li>
+          <li><i class="fas fa-check"></i> Badge exclusif sur votre profil.</li>
+        </ul>
+        <div class="gold-price-box">
+          <span>Prix unique</span>
+          <strong>50 000 Ar</strong>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeGoldModal()">Annuler</button>
+        <button class="btn btn-primary" id="confirmGoldBtn" onclick="confirmGoldActivation()">
+          Confirmer le paiement <i class="fas fa-check"></i>
+        </button>
+      </div>
+    </div>
+  </div>
 
-<!-- TOAST -->
-<div class="toast" id="toast"></div>
+</div><!-- /profil-wrap -->
 
 <?= $this->endSection() ?>

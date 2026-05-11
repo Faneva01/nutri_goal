@@ -1,12 +1,12 @@
-<?= $this->extend('layouts/main') ?>
+<?= $this->extend('layouts/admin') ?>
 
 <?= $this->section('content') ?>
 
 <div class="admin-login-container">
     <div class="admin-login-card">
         <div class="admin-login-header">
-            <h1 class="admin-login-title">Espace Administrateur</h1>
-            <p class="admin-login-subtitle">Connexion sécurisée</p>
+            <h1 class="admin-login-title">Connexion Administrateur</h1>
+            <p class="admin-login-subtitle">Accédez au tableau de bord Nutri Goal</p>
         </div>
 
         <?php if (session()->getFlashdata('error')): ?>
@@ -77,22 +77,21 @@
                 </label>
             </div>
 
-            <button type="submit" class="btn btn-admin-primary admin-btn-login w-100">
-                <i class="fas fa-sign-in-alt"></i> Connexion
+            <button type="submit" class="btn-admin-primary admin-btn-login w-100">
+                <i class="fas fa-sign-in-alt"></i> Se connecter
             </button>
 
-            <div class="admin-login-footer">
-                <a href="<?= base_url('/') ?>" class="admin-back-link">
-                    <i class="fas fa-arrow-left"></i> Retour à l'accueil
-                </a>
+            <div class="admin-login-security">
+                <small class="text-muted">
+                    <i class="fas fa-shield-alt"></i> 
+                    Cette zone est protégée et réservée aux administrateurs autorisés.
+                </small>
             </div>
         </form>
-
-        <div class="admin-login-security">
-            <small class="text-muted">
-                <i class="fas fa-shield-alt"></i> 
-                Cette zone est protégée et réservée aux administrateurs autorisés.
-            </small>
+        <div class="admin-login-footer">
+            <a href="<?= base_url('/login') ?>" class="admin-back-link">
+                <i class="fas fa-arrow-left"></i> Connexion Utilisateur
+            </a>
         </div>
     </div>
 </div>

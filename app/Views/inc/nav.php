@@ -57,7 +57,7 @@
                 Paiement
             </a>
 
-            <a href="<?= base_url('/code/achat') ?>" class="dropdown-link">
+            <a href="<?= base_url('/paiement') ?>" class="dropdown-link">
                 <i class="fas fa-bag-shopping"></i>
                 Acheter un code
             </a>

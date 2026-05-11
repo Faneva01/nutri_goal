@@ -1,0 +1,101 @@
+|- app
+        |- Config
+                |- App.php
+                |- Autoload.php
+                |- Boot/
+                |- Database.php
+                |- Filters.php
+                |- Routes/
+                |- Routes.php
+                |- Services.php
+                |- Validation.php
+                |- View.php
+                ...
+        |- Controllers
+                |- Admin/
+                |- AdminAuthController.php
+                |- DashboardUserController.php
+                |- LoginController.php
+                |- RegisterController.php
+                |- ProfilController.php
+                |- RegimeController.php
+                |- PaiementController.php
+                |- ObjectifController.php
+                |- StatUtilisateurController.php
+                |- StatTypeUtilisateurController.php
+                |- StatChiffreAffaireController.php
+                |- StatRegimeController.php
+                |- ValidationCodeController.php
+        |- Models
+                |- AdminModel.php
+                |- UserModel.php
+                |- RegimeModel.php
+                |- ObjectifModel.php
+                |- AbonnementRegimeModel.php
+                |- CodePortefeuilleModel.php
+                ...
+        |- Views
+                |- layouts/
+                        |- main.php
+                        |- admin.php
+                |- inc/
+                        |- nav.php
+                |- pages/
+                |- errors/
+        |- Helpers
+        |- Filters
+        |- Libraries
+        |- Services
+
+|- composer.json
+|- README.md
+|- phpunit.xml.dist
+
+|- database
+        |- 09052026-01-schema.sql
+        |- 09052026-02-data.sql
+        |- 10052026-03-utilisateur-schema.sql
+        |- 10052026-04-abonement-gold-schema.sql
+        |- 10052026-05-regime-schema.sql
+        |- 10052026-06-codes-solde-schema.sql
+        |- 10052026-01-schema-faneva.sql
+        |- test/faneva/10052026--07-faneva-test.sql
+
+|- public
+        |- index.php
+        |- assets/
+                |- css/
+                        |- style.css
+                        |- utilities.css
+                        |- components.css
+                        |- variables.css
+                        |- admin/
+                                |- admin-layout.css
+                                |- admin-dashboard.css
+                                |- admin-login.css
+                                |- admin-stats.css
+                        |- auth/
+                        |- portefeuille/
+                        |- regime/
+                        |- profil-page.css
+                |- js/
+                        |- admin/
+                                |- dashboard.js
+                                |- stat-usuarios.js
+                                |- stat-type-usuarios.js
+                                |- stat-chiffre-affaire.js
+                                |- stat-regime.js
+                        |- dashboard-user.js
+                        |- profil-page.js
+                        |- regime/
+                        |- portefeuille/
+
+|- system
+        |- BaseController.php
+        |- Model.php
+        |- ...
+
+|- tests
+|- writable
+
+|- spark

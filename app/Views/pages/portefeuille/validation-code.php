@@ -1,110 +1,129 @@
 <?= $this->extend('layouts/main') ?>
-
 <?= $this->section('content') ?>
+<?php
+// app/Views/portefeuille/validation-code.php
+$solde  = number_format($user['solde'] ?? 0, 2, ',', ' ');
+?>
 
-<div class="portefeuille-container">
-    <!-- Header -->
-    <div class="portefeuille-header">
-        <h1>Valider votre code</h1>
-        <p>Entrez votre code portefeuille pour ajouter du solde</p>
-    </div>
+<main class="vc-wrap">
 
-    <!-- Alerts Container -->
-    <div id="alerts-container">
-        <?php if (session()->getFlashdata('success')): ?>
-            <div class="alert alert-success">
-                ✓ <?= esc(session()->getFlashdata('success')) ?>
-                <span class="alert-close" onclick="this.parentElement.remove()">×</span>
-            </div>
-        <?php endif; ?>
+  <!-- Breadcrumb -->
+  <div class="vc-breadcrumb">
+    <a href="<?= base_url('dashboard') ?>">Tableau de bord</a>
+    <span>›</span>
+    <span>Portefeuille</span>
+  </div>
 
-        <?php if (session()->getFlashdata('error')): ?>
-            <div class="alert alert-danger">
-                ✗ <?= esc(session()->getFlashdata('error')) ?>
-                <span class="alert-close" onclick="this.parentElement.remove()">×</span>
-            </div>
-        <?php endif; ?>
+  <div class="vc-grid">
 
-        <?php $errors = session()->getFlashdata('errors'); ?>
-        <?php if (!empty($errors) && is_array($errors)): ?>
-            <div class="alert alert-danger">
-                <div>
-                    <strong>Erreur(s) de validation:</strong>
-                    <ul style="margin: 0.5rem 0 0 1.5rem;">
-                        <?php foreach ($errors as $error): ?>
-                            <li><?= esc($error) ?></li>
-                        <?php endforeach; ?>
-                    </ul>
-                </div>
-                <span class="alert-close" onclick="this.parentElement.remove()">×</span>
-            </div>
-        <?php endif; ?>
-    </div>
-
-    <!-- Validation Form -->
-    <form id="validate-form" method="post" action="<?= site_url('/code/validation') ?>" class="form-section">
-        <h2 class="form-section-title">Saisir votre code</h2>
-
-        <!-- Code Input -->
-        <div class="form-group">
-            <label for="code" class="form-label">Code portefeuille *</label>
-            <input type="text" 
-                   id="code" 
-                   name="code" 
-                   class="form-input" 
-                   value="<?= esc(old('code')) ?>"
-                   placeholder="Collez votre code ici (ex: CODE123456789)"
-                   required
-                   autocomplete="off">
-            <small style="color: var(--gray); display: block; margin-top: 0.5rem;">
-                Vous trouverez votre code dans l'email de confirmation du paiement
-            </small>
+    <!-- ── Solde + Recharge ───────────────────────────────── -->
+    <section class="vc-card vc-wallet">
+      <div class="vc-wallet-header">
+        <div class="vc-wallet-icon">💰</div>
+        <div>
+          <h2>Mon Portefeuille</h2>
+          <p>Solde actuel</p>
         </div>
+      </div>
 
-        <!-- Code Status Feedback -->
-        <div id="code-status" style="margin: 1rem 0;"></div>
+      <div class="vc-balance">
+        <span class="vc-balance-label">Solde disponible</span>
+        <span class="vc-balance-amount" id="soldeDisplay"><?= $solde ?> Ar</span>
+      </div>
 
-        <!-- Submit Button -->
-        <div class="form-actions">
-            <button type="submit" class="btn btn-primary">
-                Valider le code
-            </button>
-            <a href="<?= site_url('/code/achat') ?>" class="btn btn-secondary">
-                Acheter un nouveau code
-            </a>
+      <hr class="vc-divider">
+
+      <div class="vc-recharge">
+        <p class="vc-recharge-title">Entrer un code de recharge</p>
+        <div class="vc-code-row">
+          <input type="text" id="codeInput" class="vc-code-input"
+                 placeholder="EX : A3F9C2B1D0"
+                 maxlength="20" autocomplete="off"
+                 oninput="this.value = this.value.toUpperCase()">
+          <button class="vc-valider-btn" id="btnValider" onclick="validerCode()">
+            Valider
+          </button>
         </div>
-    </form>
+        <p class="vc-feedback" id="codeFeedback"></p>
+      </div>
 
-    <!-- Tips Section -->
-    <div class="form-section" style="background: rgba(76, 175, 80, 0.05); border-left-color: var(--success);">
-        <h3 style="color: var(--success); margin-bottom: 1rem;">💡 Conseils</h3>
-        <ul style="list-style: none; padding: 0;">
-            <li style="padding: 0.5rem 0;">
-                ✓ Vérifiez que vous avez copié correctement le code complet
+      <div class="vc-cta">
+        <a href="<?= base_url('portefeuille/acheter') ?>" class="vc-acheter-btn">
+          ➕ Recharger via Mobile Money
+        </a>
+      </div>
+    </section>
+
+    <!-- ── Historique transactions ────────────────────────── -->
+    <section class="vc-card vc-history">
+      <h2>Historique des transactions</h2>
+      <p class="vc-card-sub">10 dernières opérations</p>
+
+      <?php if (empty($transactions)): ?>
+        <p class="vc-empty">Aucune transaction pour le moment.</p>
+      <?php else: ?>
+        <ul class="vc-tx-list">
+          <?php foreach ($transactions as $tx): ?>
+            <?php
+              $icon = match ($tx['type_transaction']) {
+                'ajout_code'    => '🎟',
+                'achat_regime'  => '🥗',
+                'achat_gold'    => '⭐',
+                'remboursement' => '↩️',
+                default         => '💳',
+              };
+              $positif = in_array($tx['type_transaction'], ['ajout_code','remboursement']);
+            ?>
+            <li class="vc-tx-item">
+              <span class="vc-tx-icon"><?= $icon ?></span>
+              <div class="vc-tx-info">
+                <span class="vc-tx-label"><?= esc($tx['description'] ?? $tx['type_transaction']) ?></span>
+                <span class="vc-tx-date"><?= esc(date('d/m/Y H:i', strtotime($tx['date_transaction']))) ?></span>
+              </div>
+              <span class="vc-tx-amount <?= $positif ? 'pos' : 'neg' ?>">
+                <?= $positif ? '+' : '-' ?><?= number_format($tx['montant'], 2, ',', ' ') ?> Ar
+              </span>
             </li>
-            <li style="padding: 0.5rem 0;">
-                ✓ Le code doit commencer par "CODE" suivi de chiffres
-            </li>
-            <li style="padding: 0.5rem 0;">
-                ✓ Un code ne peut être utilisé qu'une seule fois
-            </li>
-            <li style="padding: 0.5rem 0;">
-                ✓ Certains codes peuvent avoir une date d'expiration
-            </li>
+          <?php endforeach; ?>
         </ul>
-    </div>
+      <?php endif; ?>
+    </section>
+  </div>
+</main>
 
-    <!-- History Section -->
-    <?php if (session()->get('user_id')): ?>
-    <div class="form-section">
-        <h3 class="form-section-title">Historique récent</h3>
-        <p style="color: var(--gray); text-align: center; padding: 2rem;">
-            <a href="<?= site_url('/code/historique') ?>" style="color: var(--primary); font-weight: 600;">
-                Voir votre historique complet →
-            </a>
-        </p>
-    </div>
-    <?php endif; ?>
-</div>
+<script>
+async function validerCode() {
+  const code = document.getElementById('codeInput').value.trim();
+  const fb   = document.getElementById('codeFeedback');
+  const btn  = document.getElementById('btnValider');
+
+  if (!code) { fb.textContent = 'Saisissez un code.'; fb.className = 'vc-feedback error'; return; }
+
+  btn.disabled = true;
+  btn.textContent = '…';
+
+  const resp = await fetch('<?= base_url('portefeuille/valider-code') ?>', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      code,
+      '<?= csrf_token() ?>': '<?= csrf_hash() ?>',
+    }),
+  });
+  const data = await resp.json();
+
+  fb.className = 'vc-feedback ' + (data.ok ? 'success' : 'error');
+  fb.textContent = data.message;
+
+  if (data.ok) {
+    document.getElementById('soldeDisplay').textContent = data.nouveau_solde + ' Ar';
+    document.getElementById('codeInput').value = '';
+    setTimeout(() => location.reload(), 1800);
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Valider';
+}
+</script>
 
 <?= $this->endSection() ?>

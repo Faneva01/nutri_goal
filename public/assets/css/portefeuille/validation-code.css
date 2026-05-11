@@ -1,0 +1,183 @@
+/* ============================================================
+   public/assets/css/portefeuille/validation-code.css
+   ============================================================ */
+
+:root {
+  --primary:       #f07050;
+  --primary-light: #f8a080;
+  --primary-pale:  #fde8e0;
+  --text-dark:     #2d2d2d;
+  --text-mid:      #666;
+  --text-light:    #999;
+  --border:        #e8ddd8;
+  --bg:            #fdf6f3;
+  --radius:        14px;
+  --shadow:        0 2px 16px rgba(220,120,80,.09);
+}
+
+.vc-wrap {
+  max-width: 900px;
+  margin: 24px auto 40px;
+  padding: 0 20px;
+}
+
+.vc-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-light);
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+.vc-breadcrumb a { color: var(--primary); text-decoration: none; }
+.vc-breadcrumb a:hover { text-decoration: underline; }
+
+.vc-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+/* ── Card base ────────────────────────────────────────────── */
+.vc-card {
+  background: #fff;
+  border: 1px solid #f2e8e3;
+  border-radius: var(--radius);
+  padding: 26px 28px;
+  box-shadow: var(--shadow);
+}
+.vc-card h2 { font-size: 17px; font-weight: 800; color: var(--text-dark); }
+.vc-card-sub { font-size: 13px; color: var(--text-light); margin: 4px 0 16px; font-weight: 500; }
+
+/* ── Wallet ───────────────────────────────────────────────── */
+.vc-wallet-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+.vc-wallet-icon {
+  width: 48px; height: 48px;
+  background: var(--primary-pale);
+  border-radius: 50%;
+  display: grid; place-items: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.vc-wallet-header h2 { margin: 0; }
+.vc-wallet-header p  { font-size: 13px; color: var(--text-light); margin: 3px 0 0; font-weight: 500; }
+
+.vc-balance {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 18px;
+}
+.vc-balance-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  font-weight: 700;
+  color: var(--text-light);
+}
+.vc-balance-amount {
+  font-size: 34px;
+  font-weight: 800;
+  color: var(--primary);
+  letter-spacing: -.5px;
+}
+
+.vc-divider { border: none; border-top: 1px solid #f0e8e4; margin: 18px 0; }
+
+.vc-recharge-title { font-size: 14px; font-weight: 700; color: var(--text-dark); margin-bottom: 10px; }
+.vc-code-row { display: flex; gap: 8px; }
+
+.vc-code-input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+.vc-code-input:focus {
+  border-color: var(--primary-light);
+  box-shadow: 0 0 0 3px rgba(240,112,80,.10);
+}
+
+.vc-valider-btn {
+  padding: 10px 20px;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .2s, transform .15s;
+}
+.vc-valider-btn:hover { background: #e05a3a; transform: translateY(-1px); }
+.vc-valider-btn:disabled { opacity: .6; cursor: default; transform: none; }
+
+.vc-feedback { font-size: 13px; font-weight: 700; min-height: 18px; margin-top: 8px; }
+.vc-feedback.success { color: #2e7d46; }
+.vc-feedback.error   { color: #c62828; }
+
+.vc-cta { margin-top: 20px; }
+.vc-acheter-btn {
+  display: block;
+  text-align: center;
+  padding: 12px;
+  background: var(--primary-pale);
+  color: var(--primary);
+  border: 1.5px solid #f5c8b0;
+  border-radius: 10px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background .2s, border-color .2s;
+}
+.vc-acheter-btn:hover { background: #fbd5c5; border-color: var(--primary-light); }
+
+/* ── History ──────────────────────────────────────────────── */
+.vc-empty { font-size: 14px; color: var(--text-light); margin-top: 12px; }
+
+.vc-tx-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.vc-tx-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid #f3ebe6;
+  border-radius: 12px;
+  background: #fffcfb;
+  transition: background .15s;
+}
+.vc-tx-item:hover { background: #fff8f5; }
+
+.vc-tx-icon { font-size: 20px; flex-shrink: 0; }
+.vc-tx-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.vc-tx-label { font-size: 13px; font-weight: 700; color: var(--text-dark); }
+.vc-tx-date  { font-size: 11px; color: var(--text-light); font-weight: 600; }
+
+.vc-tx-amount { font-size: 14px; font-weight: 800; flex-shrink: 0; }
+.vc-tx-amount.pos { color: #2e7d46; }
+.vc-tx-amount.neg { color: var(--primary); }
+
+@media (max-width: 700px) {
+  .vc-grid { grid-template-columns: 1fr; }
+}

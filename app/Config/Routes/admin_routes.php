@@ -1,39 +1,49 @@
 <?php
+// ============================================================
+// ROUTES BACK OFFICE – admin_routes.php
+// app/Config/admin_routes.php
+// Inclure dans app/Config/Routes.php :  require APPPATH.'Config/admin_routes.php';
+// ============================================================
 
-use CodeIgniter\Router\RouteCollection;
+$routes->group('admin', ['namespace' => 'App\Controllers\Admin'], function ($routes) {
 
-/**
- * @var RouteCollection $routes
- */
+    // ── Auth ────────────────────────────────────────────────
+    $routes->get('login',              'AdminAuthController::index');
+    $routes->post('login',             'AdminAuthController::login');
+    $routes->get('logout',             'AdminAuthController::logout');
 
-// Routes administrateur
-$routes->group('/admin', static function($routes) {
-    // Authentification admin
-    $routes->get('/login', 'AdminAuthController::login');
-    $routes->post('/auth/verify', 'AdminAuthController::verify');
-    $routes->get('/auth/logout', 'AdminAuthController::logout');
-    
-    // Dashboard admin (protection nécessaire in middleware)
-    $routes->get('/dashboard', 'AdminAuthController::dashboard');
-    
-    // Statistiques - Utilisateurs
-    $routes->get('/stats/usuarios', 'StatUtilisateurController::index');
-    $routes->get('/api/stats/usuarios', 'StatUtilisateurController::getChartData');
-    
-    // Statistiques - Types d'utilisateurs
-    $routes->get('/stats/type-usuarios', 'StatTypeUtilisateurController::index');
-    $routes->get('/api/stats/type-usuarios', 'StatTypeUtilisateurController::getChartData');
-    $routes->get('/api/stats/type-usuarios/detailed', 'StatTypeUtilisateurController::getDetailedStats');
-    
-    // Statistiques - Chiffre d'affaires
-    $routes->get('/stats/chiffre-affaire', 'StatChiffreAffaireController::index');
-    $routes->get('/api/stats/chiffre-affaire', 'StatChiffreAffaireController::getChartData');
-    $routes->get('/api/stats/chiffre-affaire/payment-methods', 'StatChiffreAffaireController::getPaymentMethods');
-    $routes->get('/api/stats/chiffre-affaire/stats', 'StatChiffreAffaireController::getStats');
-    
-    // Statistiques - Régimes et plats
-    $routes->get('/stats/regime', 'StatRegimeController::index');
-    $routes->get('/api/stats/regime', 'StatRegimeController::getChartData');
-    $routes->get('/api/stats/regime/dishes', 'StatRegimeController::getDishesChart');
-    $routes->get('/api/stats/regime/detailed', 'StatRegimeController::getDetailedStats');
+    // ── Dashboard ───────────────────────────────────────────
+    $routes->get('/',                  'DashboardAdminController::index');
+    $routes->get('dashboard',          'DashboardAdminController::index');
+
+    // ── Stats (AJAX endpoints) ───────────────────────────────
+    $routes->get('stats/utilisateurs', 'StatUtilisateurController::index');
+    $routes->get('stats/types',        'StatTypeUtilisateurController::index');
+    $routes->get('stats/ca',           'StatChiffreAffaireController::index');
+    $routes->get('stats/regimes',      'StatRegimeController::index');
+
+    // ── CRUD Régimes ────────────────────────────────────────
+    $routes->get('regimes',            'CrudRegimeController::index');
+    $routes->get('regimes/create',     'CrudRegimeController::create');
+    $routes->post('regimes/store',     'CrudRegimeController::store');
+    $routes->get('regimes/edit/(:num)','CrudRegimeController::edit/$1');
+    $routes->post('regimes/update/(:num)','CrudRegimeController::update/$1');
+    $routes->post('regimes/delete/(:num)','CrudRegimeController::delete/$1');
+
+    // ── CRUD Activités ──────────────────────────────────────
+    $routes->get('activites',          'CrudActiviteController::index');
+    $routes->get('activites/create',   'CrudActiviteController::create');
+    $routes->post('activites/store',   'CrudActiviteController::store');
+    $routes->get('activites/edit/(:num)','CrudActiviteController::edit/$1');
+    $routes->post('activites/update/(:num)','CrudActiviteController::update/$1');
+    $routes->post('activites/delete/(:num)','CrudActiviteController::delete/$1');
+
+    // ── CRUD Codes portefeuille ─────────────────────────────
+    $routes->get('codes',              'CrudCodeController::index');
+    $routes->post('codes/valider/(:num)','CrudCodeController::valider/$1');
+    $routes->post('codes/generer',     'CrudCodeController::generer');
+
+    // ── CRUD Utilisateurs Gold ──────────────────────────────
+    $routes->get('gold',               'CrudTypeUtilisateurController::index');
+    $routes->post('gold/toggle/(:num)','CrudTypeUtilisateurController::toggle/$1');
 });

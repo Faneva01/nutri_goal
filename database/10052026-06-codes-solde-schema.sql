@@ -7,7 +7,7 @@ CREATE TABLE codes_solde (
   utilisateur_id INT NULL,
   date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   date_utilisation TIMESTAMP NULL,
-
+  
   FOREIGN KEY (utilisateur_id) REFERENCES utilisateurs(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

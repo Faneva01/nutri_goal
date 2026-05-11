@@ -118,7 +118,7 @@ CREATE TABLE codes_solde (
   montant DECIMAL(10,2) NOT NULL,
 
   utilisateur_id INT NULL,
-
+  est_utilise TINYINT DEFAULT 0,
   date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   date_utilisation TIMESTAMP NULL DEFAULT NULL,
 

@@ -1,106 +1,138 @@
 <?php
-
+// ============================================================
+// app/Controllers/ValidationCodeController.php
+// ============================================================
 namespace App\Controllers;
 
 use App\Models\CodePortefeuilleModel;
 
 class ValidationCodeController extends BaseController
 {
-    protected $codePortefeuilleModel;
+    protected CodePortefeuilleModel $codeModel;
 
     public function __construct()
     {
-        $this->codePortefeuilleModel = new CodePortefeuilleModel();
+        $this->codeModel = new CodePortefeuilleModel();
+        if (! session()->get('user_id')) {
+            redirect()->to('/login')->send(); exit;
+        }
     }
 
-    /**
-     * Affiche la page d'intégration du code portefeuille
-     */
+    // ── GET /portefeuille ────────────────────────────────────
     public function index()
     {
-        return view('pages/integration_code', [
-            'title' => 'Intégration du Code Portefeuille',
-            'styles' => ['style.css']
+        $db      = \Config\Database::connect();
+        $userId  = session()->get('user_id');
+        $user    = $db->table('utilisateurs')->where('id', $userId)->get()->getRowArray();
+
+        $transactions = $db->table('historique_transactions')
+            ->where('utilisateur_id', $userId)
+            ->orderBy('date_transaction', 'DESC')
+            ->limit(10)
+            ->get()
+            ->getResultArray();
+
+        return view('pages/portefeuille/validation-code', [
+            'title'        => 'Mon Portefeuille – NutriGoal',
+            'styles'       => ['portefeuille/validation-code.css'],
+            'user'         => $user,
+            'transactions' => $transactions,
         ]);
     }
 
-    /**
-     * Traite l'intégration du code saisi par l'utilisateur
-     */
-    public function integrer()
+    public function valider()
     {
-        $code = $this->request->getPost('code');
-        $utilisateurId = $this->getCurrentUserId();
+        $db = \Config\Database::connect();
+        $db->transBegin();
 
-        if (!$utilisateurId) {
-            return redirect()->to('/login')->with('error', 'Vous devez être connecté pour intégrer un code.');
-        }
+        try {
+            $userId  = (int) session()->get('user_id');
+            $codeStr = strtoupper(trim($this->request->getPost('code') ?? ''));
 
-        if (empty($code)) {
-            return redirect()->back()->withInput()->with('error', 'Le code est requis.');
-        }
+            if (empty($codeStr)) {
+                return $this->response->setJSON([
+                    'ok' => false,
+                    'message' => 'Code vide.'
+                ]);
+            }
 
-        if (!$this->codePortefeuilleModel->estValide($code)) {
-            return redirect()->back()->with('error', 'Le code est invalide, expiré ou déjà utilisé.');
-        }
+            // LOCK utilisateur (évite double update simultané)
+            $user = $db->table('utilisateurs')
+                ->where('id', $userId)
+                ->get()
+                ->getRowArray();
 
-        if ($this->codePortefeuilleModel->utiliserCode($code, $utilisateurId)) {
-            return redirect()->back()->with('success', 'Code intégré avec succès. Votre solde a été mis à jour.');
-        }
+            if (!$user) {
+                throw new \Exception("Utilisateur introuvable");
+            }
 
-        return redirect()->back()->with('error', 'Impossible d’intégrer le code pour le moment.');
-    }
+            // VERROUILLAGE DU CODE (anti double usage)
+            $code = $db->table('codes_solde')
+                ->where('code', $codeStr)
+                ->where('est_utilise', 0)
+                ->get()
+                ->getRowArray();
 
-    protected function getCurrentUserId()
-    {
-        $session = session();
+            if (!$code || !isset($code['id'])) {
+                return $this->response->setJSON([
+                    'ok' => false,
+                    'message' => 'Code invalide ou déjà utilisé.'
+                ]);
+            }
 
-        if ($session->has('user_id')) {
-            return $session->get('user_id');
-        }
+            $ancienSolde  = (float) $user['solde'];
+            $montant      = (float) $code['montant'];
+            $nouveauSolde = $ancienSolde + $montant;
 
-        if ($session->has('id')) {
-            return $session->get('id');
-        }
+            // 1. UPDATE SOLDE UTILISATEUR
+            $db->table('utilisateurs')
+                ->where('id', $userId)
+                ->update(['solde' => $nouveauSolde]);
 
-        $user = $session->get('user');
-        if (is_array($user) && isset($user['id'])) {
-            return $user['id'];
-        }
+            // 2. MARQUER CODE COMME UTILISÉ (IMPORTANT: sécurisé)
+            $updated = $db->table('codes_solde')
+                ->where('id', (int) $code['id'])
+                ->where('est_utilise', 0) // anti double clic
+                ->update([
+                    'utilisateur_id'   => $userId,
+                    'est_utilise'      => 1,
+                    'date_utilisation' => date('Y-m-d H:i:s')
+                ]);
 
-        if (is_object($user) && isset($user->id)) {
-            return $user->id;
-        }
+            if (!$updated) {
+                throw new \Exception("Code déjà utilisé pendant l'opération");
+            }
 
-        return null;
-    }
+            // 3. HISTORIQUE
+            $db->table('historique_transactions')->insert([
+                'utilisateur_id'   => $userId,
+                'type_transaction' => 'ajout_code',
+                'montant'          => $montant,
+                'ancien_solde'     => $ancienSolde,
+                'nouveau_solde'    => $nouveauSolde,
+                'description'      => 'Code rechargé : ' . $codeStr,
+            ]);
 
-    /**
-     * Vérifie la validité d'un code via AJAX
-     */
-    public function verifier()
-    {
-        $code = $this->request->getPost('code');
+            // COMMIT
+            $db->transCommit();
 
-        if (empty($code)) {
             return $this->response->setJSON([
-                'valid' => false,
-                'message' => 'Le code est requis.'
+                'ok' => true,
+                'message' => '+ ' . number_format($montant, 2) . ' Ar ajouté à votre solde.',
+                'nouveau_solde' => number_format($nouveauSolde, 2),
+            ]);
+
+        } catch (\Throwable $e) {
+
+            // ROLLBACK sécurité
+            $db->transRollback();
+
+            log_message('error', $e->getMessage());
+
+            return $this->response->setJSON([
+                'ok' => false,
+                'message' => 'Erreur lors de la validation du code.'
             ]);
         }
-
-        if ($this->codePortefeuilleModel->estValide($code)) {
-            $codeData = $this->codePortefeuilleModel->trouverParCode($code);
-            return $this->response->setJSON([
-                'valid' => true,
-                'montant' => $codeData['montant'],
-                'message' => 'Code valide et utilisable.'
-            ]);
-        }
-
-        return $this->response->setJSON([
-            'valid' => false,
-            'message' => 'Code invalide ou déjà utilisé.'
-        ]);
     }
 }

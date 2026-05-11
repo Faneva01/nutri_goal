@@ -1,135 +1,122 @@
 <?= $this->extend('layouts/main') ?>
-
 <?= $this->section('content') ?>
+<?php
+// app/Views/portefeuille/achat-code.php
+?>
 
-<div class="portefeuille-container">
-    <!-- Header -->
-    <div class="portefeuille-header">
-        <h1>Recharger votre portefeuille</h1>
-        <p>Achetez un code pour ajouter du solde à votre compte</p>
+<main class="ac-wrap">
+
+  <div class="ac-breadcrumb">
+    <a href="<?= base_url('portefeuille') ?>">← Retour au portefeuille</a>
+  </div>
+
+  <div class="ac-hero">
+    <h1>Recharger mon portefeuille</h1>
+    <p>Choisissez un montant et un moyen de paiement Mobile Money.</p>
+  </div>
+
+  <?php if (session()->getFlashdata('error')): ?>
+    <div class="ac-alert"><?= esc(session()->getFlashdata('error')) ?></div>
+  <?php endif; ?>
+
+  <div class="ac-grid">
+
+    <!-- ── Formulaire ─────────────────────────────────────── -->
+    <div class="ac-card ac-form-card">
+
+      <!-- Montants rapides -->
+      <p class="ac-section-label">Choisir un montant</p>
+      <div class="ac-amounts">
+        <?php foreach ([2000, 5000, 10000, 20000, 50000] as $m): ?>
+          <button type="button" class="ac-amount-btn" onclick="setMontant(<?= $m ?>)">
+            <?= number_format($m, 0, ',', ' ') ?> Ar
+          </button>
+        <?php endforeach; ?>
+      </div>
+      <p class="ac-or">ou saisir un montant personnalisé</p>
+      <input type="number" id="montantInput" class="ac-input" placeholder="Montant en Ar" min="1000" step="500">
+
+      <hr class="ac-divider">
+
+      <!-- Moyens de paiement -->
+      <p class="ac-section-label">Moyen de paiement</p>
+      <div class="ac-methods">
+        <label class="ac-method" for="m-mvola">
+          <input type="radio" id="m-mvola" name="moyen" value="mvola" checked>
+          <span class="ac-method-inner">
+            <span class="ac-method-emoji">📱</span>
+            <span>
+              <strong>MVola</strong>
+              <small>Telma Madagascar</small>
+            </span>
+          </span>
+        </label>
+        <label class="ac-method" for="m-orange">
+          <input type="radio" id="m-orange" name="moyen" value="orange_money">
+          <span class="ac-method-inner">
+            <span class="ac-method-emoji">🟠</span>
+            <span>
+              <strong>Orange Money</strong>
+              <small>Orange Madagascar</small>
+            </span>
+          </span>
+        </label>
+        <label class="ac-method" for="m-airtel">
+          <input type="radio" id="m-airtel" name="moyen" value="airtel">
+          <span class="ac-method-inner">
+            <span class="ac-method-emoji">🔴</span>
+            <span>
+              <strong>Airtel Money</strong>
+              <small>Airtel Madagascar</small>
+            </span>
+          </span>
+        </label>
+      </div>
+
+      <form method="post" action="<?= base_url('portefeuille/payer') ?>" id="payForm">
+        <?= csrf_field() ?>
+        <input type="hidden" name="montant" id="montantHidden">
+        <input type="hidden" name="moyen"   id="moyenHidden">
+        <button type="button" class="ac-pay-btn" onclick="submitPay()">
+          Confirmer le paiement
+        </button>
+      </form>
     </div>
 
-    <!-- Alerts Container -->
-    <div id="alerts-container">
-        <?php if (session()->getFlashdata('success')): ?>
-            <div class="alert alert-success">
-                <?= esc(session()->getFlashdata('success')) ?>
-                <span class="alert-close" onclick="this.parentElement.remove()">×</span>
-            </div>
-        <?php endif; ?>
-
-        <?php if (session()->getFlashdata('error')): ?>
-            <div class="alert alert-danger">
-                <?= esc(session()->getFlashdata('error')) ?>
-                <span class="alert-close" onclick="this.parentElement.remove()">×</span>
-            </div>
-        <?php endif; ?>
-
-        <?php $errors = session()->getFlashdata('errors'); ?>
-        <?php if (!empty($errors) && is_array($errors)): ?>
-            <div class="alert alert-danger">
-                <div>
-                    <strong>Erreur(s) de validation:</strong>
-                    <ul style="margin: 0.5rem 0 0 1.5rem;">
-                        <?php foreach ($errors as $error): ?>
-                            <li><?= esc($error) ?></li>
-                        <?php endforeach; ?>
-                    </ul>
-                </div>
-                <span class="alert-close" onclick="this.parentElement.remove()">×</span>
-            </div>
-        <?php endif; ?>
+    <!-- ── Infos ──────────────────────────────────────────── -->
+    <div class="ac-card ac-info-card">
+      <p class="ac-section-label">ℹ️ Comment ça marche ?</p>
+      <ol class="ac-steps">
+        <li><span>1</span> Choisissez un montant et un opérateur.</li>
+        <li><span>2</span> Après paiement, vous recevrez un code unique.</li>
+        <li><span>3</span> Entrez ce code dans votre portefeuille.</li>
+        <li><span>4</span> Votre solde est crédité immédiatement.</li>
+      </ol>
+      <hr class="ac-divider">
+      <p class="ac-section-label">🔒 Sécurisé</p>
+      <p class="ac-info-text">Vos transactions sont protégées et chaque code est à usage unique.</p>
     </div>
 
-    <!-- Form Section -->
-    <form id="buy-form" method="post" action="<?= site_url('/code/achat') ?>" class="form-section">
-        <h2 class="form-section-title">Détails d'achat</h2>
+  </div>
+</main>
 
-        <!-- Montant -->
-        <div class="form-group">
-            <label for="montant" class="form-label">Montant (Ar) *</label>
-            <input type="number" 
-                   step="100" 
-                   min="1000" 
-                   id="montant" 
-                   name="montant" 
-                   class="form-input" 
-                   value="<?= esc(old('montant')) ?>"
-                   placeholder="Entrez le montant souhaité"
-                   required>
-            <small style="color: var(--gray); display: block; margin-top: 0.5rem;">
-                Montant minimum: 1000 Ar. Exemple: 5000, 10000, 50000...
-            </small>
-            <div id="montant-info" style="margin-top: 0.5rem; font-weight: 600; color: var(--success);"></div>
-        </div>
-
-        <!-- Moyen de paiement -->
-        <div class="form-group">
-            <label class="form-label">Moyen de paiement *</label>
-            <div class="payment-methods">
-                <div class="payment-method">
-                    <input type="radio" id="mvola" name="moyen_paiement" value="mvola" <?= old('moyen_paiement') === 'mvola' ? 'checked' : '' ?> required>
-                    <label for="mvola">
-                        <span class="payment-icon">📱</span>
-                        <span>MVola</span>
-                    </label>
-                </div>
-
-                <div class="payment-method">
-                    <input type="radio" id="airtel" name="moyen_paiement" value="airtel_money" <?= old('moyen_paiement') === 'airtel_money' ? 'checked' : '' ?>>
-                    <label for="airtel">
-                        <span class="payment-icon">📱</span>
-                        <span>Airtel Money</span>
-                    </label>
-                </div>
-
-                <div class="payment-method">
-                    <input type="radio" id="orange" name="moyen_paiement" value="orange_money" <?= old('moyen_paiement') === 'orange_money' ? 'checked' : '' ?>>
-                    <label for="orange">
-                        <span class="payment-icon">📱</span>
-                        <span>Orange Money</span>
-                    </label>
-                </div>
-
-                <div class="payment-method">
-                    <input type="radio" id="carte" name="moyen_paiement" value="carte_bancaire" <?= old('moyen_paiement') === 'carte_bancaire' ? 'checked' : '' ?>>
-                    <label for="carte">
-                        <span class="payment-icon">💳</span>
-                        <span>Carte Bancaire</span>
-                    </label>
-                </div>
-            </div>
-        </div>
-
-        <!-- Boutons d'action -->
-        <div class="form-actions">
-            <button type="submit" class="btn btn-primary">
-                Procéder au paiement
-            </button>
-            <a href="<?= site_url('/code/validation') ?>" class="btn btn-secondary">
-                J'ai déjà un code
-            </a>
-        </div>
-    </form>
-
-    <!-- Info Section -->
-    <div class="form-section" style="background: rgba(33, 150, 243, 0.05); border-left-color: #2196F3;">
-        <h3 style="color: #2196F3; margin-bottom: 1rem;">ℹ️ Comment ça marche?</h3>
-        <ul style="list-style: none; padding: 0;">
-            <li style="padding: 0.5rem 0;">
-                <strong>1.</strong> Sélectionnez le montant que vous souhaitez recharger
-            </li>
-            <li style="padding: 0.5rem 0;">
-                <strong>2.</strong> Choisissez votre moyen de paiement préféré
-            </li>
-            <li style="padding: 0.5rem 0;">
-                <strong>3.</strong> Complétez le paiement pour recevoir votre code
-            </li>
-            <li style="padding: 0.5rem 0;">
-                <strong>4.</strong> Utilisez le code pour ajouter du solde à votre portefeuille
-            </li>
-        </ul>
-    </div>
-</div>
+<script>
+  function setMontant(v) {
+    document.getElementById('montantInput').value = v;
+    document.querySelectorAll('.ac-amount-btn').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+  }
+  function submitPay() {
+    const montant = document.getElementById('montantInput').value;
+    const moyen   = document.querySelector('input[name="moyen"]:checked').value;
+    if (!montant || montant < 1000) {
+      alert('Montant minimum : 1 000 Ar');
+      return;
+    }
+    document.getElementById('montantHidden').value = montant;
+    document.getElementById('moyenHidden').value   = moyen;
+    document.getElementById('payForm').submit();
+  }
+</script>
 
 <?= $this->endSection() ?>

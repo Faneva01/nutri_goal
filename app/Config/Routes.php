@@ -15,3 +15,5 @@ require APPPATH . 'Config/Routes/dashboard_user_routes.php';
 require APPPATH . 'Config/Routes/regime_route.php';
 require APPPATH . 'Config/Routes/paiement_routes.php';
 require APPPATH . 'Config/Routes/profil_route.php';
+require APPPATH . 'Config/Routes/portefeuille_routes.php';
+require APPPATH . 'Config/Routes/admin_routes.php';

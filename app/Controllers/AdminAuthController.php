@@ -22,7 +22,7 @@ class AdminAuthController extends BaseController
             return redirect()->to('/admin/dashboard');
         }
 
-        return view('admin/admin-login', [
+        return view('pages/admin/admin-login', [
             'title' => 'Connexion Administrateur',
             'styles' => ['admin/admin-login.css']
         ]);
@@ -95,10 +95,10 @@ class AdminAuthController extends BaseController
                 ->with('error', 'Connexion requise');
         }
 
-        return view('admin/dashboard-admin', [
+        return view('pages/admin/dashboard-admin', [
             'title' => 'Dashboard Administrateur',
             'styles' => ['admin/admin-dashboard.css'],
-            'scripts' => ['admin/dashboard.js'],
+            'scripts' => ['admin/dashboard-admin.js'],
             'stats' => $this->getGlobalStats(),
             'recent_activity' => $this->getRecentActivity()
         ]);
